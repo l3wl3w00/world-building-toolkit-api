@@ -1,4 +1,6 @@
-﻿namespace Api.Configurers;
+﻿using Hellang.Middleware.ProblemDetails;
+
+namespace Api.Configurers;
 internal class AppConfigurer
 {
     private readonly WebApplication _app;
@@ -15,6 +17,8 @@ internal class AppConfigurer
 
     private void Configure()
     {
+        _app.UseProblemDetails();
+        
         if (_app.Environment.IsDevelopment())
         {
             _app.UseSwagger();

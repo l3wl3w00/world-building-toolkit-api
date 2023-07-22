@@ -13,16 +13,20 @@ public class WorldBuilderDbContext : IdentityDbContext<User, IdentityRole<Guid>,
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.Entity<World>().HasData(
-            new World { Id = Guid.NewGuid(), Name = "World 1", Description = "World 1 Description" },
-            new World { Id = Guid.NewGuid(), Name = "World 2", Description = "World 2 Description" },
-            new World { Id = Guid.NewGuid(), Name = "World 3", Description = "World 3 Description" }
-        );
+        builder.Entity<World>(world =>
+        {
+            world.HasOne(w => w.Creator)
+                .WithMany(u => u.Worlds)
+                .HasPrincipalKey(u => u.UserName)
+                .HasForeignKey(w => w.Username);
+        });
 
         builder.Entity<User>(user =>
         {
-            user.HasIndex(u => u.UserName).IsUnique();
             user.HasIndex(u => u.Email).IsUnique();
+            user.HasAlternateKey(u => u.UserName);
+            user.HasMany(u => u.Worlds).
+                WithOne(w => w.Creator);
         });
         
     }

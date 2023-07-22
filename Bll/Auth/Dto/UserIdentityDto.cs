@@ -1,4 +1,4 @@
-﻿namespace WorldBuilderBLL.Auth.Dto;
+﻿namespace Bll.Auth.Dto;
 
 public class UserIdentityDto
 {

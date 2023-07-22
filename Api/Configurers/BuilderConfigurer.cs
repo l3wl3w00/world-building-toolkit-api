@@ -1,4 +1,5 @@
-﻿using Bll.Auth;
+﻿using System.Net;
+using Bll.Auth;
 using Bll.Exception;
 using Bll.Mapper;
 using Bll.World;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Dal.Entities;
 using Hellang.Middleware.ProblemDetails;
+using ProblemDetailsOptions = Hellang.Middleware.ProblemDetails.ProblemDetailsOptions;
 
 namespace Api.Configurers;
 internal class BuilderConfigurer
@@ -34,15 +36,9 @@ internal class BuilderConfigurer
             .AddDefaultTokenProviders();
         _services.AddProblemDetails(options =>
         {
-            options.IncludeExceptionDetails = (ctx, ex) => false;
-            // options.Map<EntityNotFoundException<>>(
-            //     (ctx, ex) =>
-            //     {
-            //         var pd = StatusCodeProblemDetails.Create(StatusCodes.Status404NotFound);
-            //         pd.Title = ex.Message;
-            //         return pd;
-            //     }
-            // );
+            var configurer = new ProblemDetailsConfigurer(options);
+            configurer.CreateMapping<EntityNotFoundException>(StatusCodes.Status404NotFound);
+            configurer.CreateMapping<EntityAlreadyExistsException>(StatusCodes.Status409Conflict);
         });
         _services.AddAutoMapper(typeof(WorldBuilderProfile));
         _services.AddTransient<IWorldService, WorldService>();
@@ -51,5 +47,27 @@ internal class BuilderConfigurer
         _services.AddSwaggerGen();
 
     }
+
+    private class ProblemDetailsConfigurer
+    {
+        private readonly ProblemDetailsOptions _options;
+
+        public ProblemDetailsConfigurer(ProblemDetailsOptions options)
+        {
+            _options = options;
+            options.IncludeExceptionDetails = (ctx, ex) => false;
+
+        }
+        public void CreateMapping<TException>(int statusCode) where TException : Exception
+        {
+            _options.Map<TException>((ctx, ex) =>
+            {
+                var pd = StatusCodeProblemDetails.Create(statusCode);
+                pd.Title = ex.Message;
+                return pd;
+            });
+        }
+    }
+
 
 }

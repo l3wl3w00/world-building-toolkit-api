@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Dal.Entities;
-using WorldBuilderBLL.Auth.Dto;
-using WorldBuilderBLL.World.Dto;
+using Bll.Auth.Dto;
+using Bll.World.Dto;
 using WorldEntity = Dal.Entities.World;
 
 namespace Bll.Mapper;

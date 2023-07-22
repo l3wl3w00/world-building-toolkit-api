@@ -3,7 +3,9 @@ using AutoMapper.QueryableExtensions;
 using Dal;
 using Microsoft.EntityFrameworkCore;
 using Bll.Exception;
-using WorldBuilderBLL.World.Dto;
+using Bll.World.Dto;
+using Dal.Entities;
+using Microsoft.Data.SqlClient;
 using WorldEntity = Dal.Entities.World;
 
 namespace Bll.World;
@@ -45,9 +47,17 @@ public class WorldService : IWorldService
         {
             await _dbContext.SaveChangesAsync();
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException e) when (e.InnerException is SqlException sqlEx)
         {
-            throw new System.Exception("todo"); //TODO
+            switch (sqlEx.Number)
+            {
+                case SqlErrorNumbers.UniqueConstraintViolation:
+                    EntityAlreadyExistsException.Throw<WorldEntity>();
+                    break;
+                case SqlErrorNumbers.ForeignKeyViolation:
+                    throw new EntityNotFoundException($"No user was found with the username {createWorldDto.UserName}");
+                    break;
+            }
         }
         return _mapper.Map<WorldDto>(world);
     }

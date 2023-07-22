@@ -1,4 +1,4 @@
-﻿using WorldBuilderBLL.World.Dto;
+﻿using Bll.World.Dto;
 
 namespace Bll.World;
 

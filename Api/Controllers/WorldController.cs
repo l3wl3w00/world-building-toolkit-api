@@ -1,6 +1,6 @@
 using Bll.World;
 using Microsoft.AspNetCore.Mvc;
-using WorldBuilderBLL.World.Dto;
+using Bll.World.Dto;
 
 namespace Api.Controllers;
 [ApiController]

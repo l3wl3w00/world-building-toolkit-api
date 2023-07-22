@@ -1,4 +1,6 @@
-﻿namespace Bll.Exception;
+﻿using Microsoft.Identity.Client;
+
+namespace Bll.Exception;
 using System;
 public class EntityNotFoundException : Exception
 {
@@ -15,6 +17,11 @@ public class EntityNotFoundException : Exception
     }
     
     private EntityNotFoundException(Type entityType) : base($"No {entityType.Name} entity was found with the given id")
+    {
+        
+    }
+
+    public EntityNotFoundException(string message) : base(message)
     {
         
     }

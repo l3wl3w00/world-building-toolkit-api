@@ -72,6 +72,7 @@ namespace Dal.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -89,10 +90,6 @@ namespace Dal.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.HasIndex("UserName")
-                        .IsUnique()
-                        .HasFilter("[UserName] IS NOT NULL");
-
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
@@ -109,29 +106,15 @@ namespace Dal.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Worlds");
+                    b.HasIndex("Username");
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("72292e48-5482-422a-bd55-954bd4c9b694"),
-                            Description = "World 1 Description",
-                            Name = "World 1"
-                        },
-                        new
-                        {
-                            Id = new Guid("3011d5e5-8987-4632-870c-93849d654b7e"),
-                            Description = "World 2 Description",
-                            Name = "World 2"
-                        },
-                        new
-                        {
-                            Id = new Guid("8401de86-566d-4df8-9717-50429d4c957f"),
-                            Description = "World 3 Description",
-                            Name = "World 3"
-                        });
+                    b.ToTable("Worlds");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -265,6 +248,18 @@ namespace Dal.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Dal.Entities.World", b =>
+                {
+                    b.HasOne("Dal.Entities.User", "Creator")
+                        .WithMany("Worlds")
+                        .HasForeignKey("Username")
+                        .HasPrincipalKey("UserName")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", null)
@@ -314,6 +309,11 @@ namespace Dal.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Dal.Entities.User", b =>
+                {
+                    b.Navigation("Worlds");
                 });
 #pragma warning restore 612, 618
         }

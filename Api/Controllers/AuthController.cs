@@ -1,6 +1,6 @@
 ﻿using Bll.Auth;
 using Microsoft.AspNetCore.Mvc;
-using WorldBuilderBLL.Auth.Dto;
+using Bll.Auth.Dto;
 
 namespace Api.Controllers;
 

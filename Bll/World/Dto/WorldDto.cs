@@ -1,4 +1,4 @@
-﻿namespace WorldBuilderBLL.World.Dto;
+﻿namespace Bll.World.Dto;
 
 public class WorldDto
 {

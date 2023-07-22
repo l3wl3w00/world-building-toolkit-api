@@ -18,7 +18,15 @@ public class WorldBuilderDbContext : IdentityDbContext<User, IdentityRole<Guid>,
             new World { Id = Guid.NewGuid(), Name = "World 2", Description = "World 2 Description" },
             new World { Id = Guid.NewGuid(), Name = "World 3", Description = "World 3 Description" }
         );
+
+        builder.Entity<User>(user =>
+        {
+            user.HasIndex(u => u.UserName).IsUnique();
+            user.HasIndex(u => u.Email).IsUnique();
+        });
+        
     }
 
     public DbSet<World> Worlds => Set<World>();
+    
 }

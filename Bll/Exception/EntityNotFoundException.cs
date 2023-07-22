@@ -1,13 +1,20 @@
 ﻿namespace Bll.Exception;
 using System;
-public class EntityNotFoundException<TEntity> : Exception
+public class EntityNotFoundException : Exception
 {
-    public EntityNotFoundException(Guid id) : base($"No {nameof(TEntity)} entity was found with id {id}")
+    public static EntityNotFoundException Throw<TEntity>(Guid? id = null)
+    {
+        if (id is null)
+            throw new EntityNotFoundException(typeof(TEntity));
+        throw new EntityNotFoundException(typeof(TEntity), id.Value);
+    }
+
+    private EntityNotFoundException(Type entityType, Guid id) : base($"No {entityType.Name} entity was found with id {id}")
     {
         
     }
     
-    public EntityNotFoundException() : base($"No {nameof(TEntity)} entity was found with the given id")
+    private EntityNotFoundException(Type entityType) : base($"No {entityType.Name} entity was found with the given id")
     {
         
     }

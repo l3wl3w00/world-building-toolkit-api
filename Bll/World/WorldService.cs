@@ -32,9 +32,9 @@ public class WorldService : IWorldService
             .ProjectTo<WorldDto>(_mapper.ConfigurationProvider)
             .SingleOrDefaultAsync();
         
-        if (result is null) throw new EntityNotFoundException<WorldEntity>(guid);
+        if (result is null) EntityNotFoundException.Throw<WorldEntity>(guid);
 
-        return result;
+        return result!;
     }
     
     public async Task<WorldDto> Create(CreateWorldDto createWorldDto)

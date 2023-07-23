@@ -99,20 +99,21 @@ namespace Dal.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("CreatorUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(256)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Username");
+                    b.HasIndex("CreatorUsername", "Name")
+                        .IsUnique();
 
                     b.ToTable("Worlds");
                 });
@@ -252,7 +253,7 @@ namespace Dal.Migrations
                 {
                     b.HasOne("Dal.Entities.User", "Creator")
                         .WithMany("Worlds")
-                        .HasForeignKey("Username")
+                        .HasForeignKey("CreatorUsername")
                         .HasPrincipalKey("UserName")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

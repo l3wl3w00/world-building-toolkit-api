@@ -19,4 +19,10 @@ public class AuthController : ControllerBase
     {
         return await _userService.Register(registerDto);
     }
+    
+    [HttpPost("login")]
+    public async Task<ActionResult<UserIdentityDto>> Login([FromBody] LoginDto loginDto)
+    {
+        return await _userService.Login(loginDto);
+    }
 }

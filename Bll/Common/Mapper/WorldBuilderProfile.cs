@@ -4,7 +4,7 @@ using Bll.Auth.Dto;
 using Bll.World.Dto;
 using WorldEntity = Dal.Entities.World;
 
-namespace Bll.Mapper;
+namespace Bll.Common.Mapper;
 
 public class WorldBuilderProfile : Profile
 {

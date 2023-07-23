@@ -18,7 +18,10 @@ public class WorldBuilderDbContext : IdentityDbContext<User, IdentityRole<Guid>,
             world.HasOne(w => w.Creator)
                 .WithMany(u => u.Worlds)
                 .HasPrincipalKey(u => u.UserName)
-                .HasForeignKey(w => w.Username);
+                .HasForeignKey(w => w.CreatorUsername);
+            
+            world.HasIndex(w => new { w.CreatorUsername, w.Name })
+                .IsUnique();
         });
 
         builder.Entity<User>(user =>

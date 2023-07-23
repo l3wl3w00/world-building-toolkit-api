@@ -1,7 +1,9 @@
-﻿using System.Net;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using Bll.Auth;
-using Bll.Exception;
-using Bll.Mapper;
+using Bll.Auth.Exception;
+using Bll.Common.Exception;
+using Bll.Common.Mapper;
 using Bll.World;
 using Dal;
 using Microsoft.AspNetCore.Identity;
@@ -27,7 +29,10 @@ internal class BuilderConfigurer
 
     private void Configure()
     {
-        _services.AddControllers();
+        _services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+        });
         _services.AddDbContext<WorldBuilderDbContext>(options =>
             options.UseSqlServer(_config.GetConnectionString("WorldBuilderDb")));
         
@@ -39,9 +44,14 @@ internal class BuilderConfigurer
             var configurer = new ProblemDetailsConfigurer(options);
             configurer.CreateMapping<EntityNotFoundException>(StatusCodes.Status404NotFound);
             configurer.CreateMapping<EntityAlreadyExistsException>(StatusCodes.Status409Conflict);
+            configurer.CreateMapping<InvalidPasswordException>(StatusCodes.Status400BadRequest);
+            configurer.CreateMapping<NotSupportedLoginTypeException>(StatusCodes.Status400BadRequest);
+            configurer.CreateMapping<RegisterException>(StatusCodes.Status500InternalServerError);
+            configurer.CreateMapping<LoginException>(StatusCodes.Status500InternalServerError);
         });
         _services.AddAutoMapper(typeof(WorldBuilderProfile));
         _services.AddTransient<IWorldService, WorldService>();
+        _services.AddTransient<RegisterErrorExceptionMapper>();
         _services.AddTransient<IUserService, UserService>();
         _services.AddEndpointsApiExplorer();
         _services.AddSwaggerGen();

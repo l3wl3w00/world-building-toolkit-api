@@ -1,15 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations.Operations;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Bll.Exception;
+namespace Bll.Common.Exception;
 
 public class EntityAlreadyExistsException : System.Exception
 {
-    public static EntityAlreadyExistsException Throw<TEntity>(string? uniqueValueName = null)
+    public static EntityAlreadyExistsException Create<TEntity>(string? uniqueValueName = null)
     {
         if (uniqueValueName.IsNullOrEmpty())
-            throw new EntityAlreadyExistsException(typeof(TEntity));
-        throw new EntityAlreadyExistsException(typeof(TEntity), uniqueValueName!);
+            return new EntityAlreadyExistsException(typeof(TEntity));
+        return new EntityAlreadyExistsException(typeof(TEntity), uniqueValueName!);
     }
 
     private EntityAlreadyExistsException(Type entityType, string uniqueValueName) :

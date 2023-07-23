@@ -8,10 +8,12 @@
 
     <ItemGroup>
       <PackageReference Include="AutoMapper" Version="12.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="7.0.9" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Dal\Dal.csproj" />
     </ItemGroup>
+    
 
 </Project>

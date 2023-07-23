@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Bll.Common;
 using Dal;
 using Microsoft.EntityFrameworkCore;
-using Bll.Exception;
+using Bll.Common.Exception;
 using Bll.World.Dto;
 using Dal.Entities;
 using Microsoft.Data.SqlClient;
@@ -29,14 +30,10 @@ public class WorldService : IWorldService
 
     public async Task<WorldDto> Get(Guid guid)
     {
-        var result = await _dbContext.Worlds
+        return await _dbContext.Worlds
             .Where(w => w.Id == guid)
             .ProjectTo<WorldDto>(_mapper.ConfigurationProvider)
-            .SingleOrDefaultAsync();
-        
-        if (result is null) EntityNotFoundException.Throw<WorldEntity>(guid);
-
-        return result!;
+            .SingleOrDo(() => EntityNotFoundException.Throw<WorldEntity>(guid));
     }
     
     public async Task<WorldDto> Create(CreateWorldDto createWorldDto)
@@ -51,13 +48,13 @@ public class WorldService : IWorldService
         {
             switch (sqlEx.Number)
             {
-                case SqlErrorNumbers.UniqueConstraintViolation:
-                    EntityAlreadyExistsException.Throw<WorldEntity>();
-                    break;
+                case SqlErrorNumbers.DuplicateUniqueConstraintViolation:
+                    throw EntityAlreadyExistsException.Create<WorldEntity>();
                 case SqlErrorNumbers.ForeignKeyViolation:
-                    throw new EntityNotFoundException($"No user was found with the username {createWorldDto.UserName}");
-                    break;
+                    throw new EntityNotFoundException($"No user was found with the username {createWorldDto.CreatorUsername}");
             }
+
+            throw;
         }
         return _mapper.Map<WorldDto>(world);
     }

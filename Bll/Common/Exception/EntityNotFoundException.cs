@@ -1,16 +1,22 @@
 ﻿using Microsoft.Identity.Client;
 
-namespace Bll.Exception;
+namespace Bll.Common.Exception;
 using System;
+
 public class EntityNotFoundException : Exception
 {
-    public static EntityNotFoundException Throw<TEntity>(Guid? id = null)
+    public static void Throw<TEntity>(Guid? id = null)
     {
         if (id is null)
             throw new EntityNotFoundException(typeof(TEntity));
         throw new EntityNotFoundException(typeof(TEntity), id.Value);
     }
 
+    public static void Throw<TEntity>(string searchValueName, string searchValue)
+    {
+        throw new EntityNotFoundException(
+            $"No {typeof(TEntity).Name} entity was found with {searchValueName} {searchValue}.");
+    }
     private EntityNotFoundException(Type entityType, Guid id) : base($"No {entityType.Name} entity was found with id {id}")
     {
         

@@ -16,8 +16,8 @@ public class WorldBuilderProfile : Profile
 
     private void UserIdentity()
     {
-        CreateMap<RegisterDto, User>();
-        CreateMap<User, UserIdentityDto>().ReverseMap();
+        CreateMap<RegisterDto, Dal.Entities.User>();
+        CreateMap<Dal.Entities.User, UserIdentityDto>().ReverseMap();
     }
 
     private void World()

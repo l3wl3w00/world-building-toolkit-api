@@ -2,15 +2,16 @@
 using Bll.Common.Exception;
 using Dal.Entities;
 using Microsoft.AspNetCore.Identity;
-
+using UserEntity = Dal.Entities.User;
 namespace Bll.Auth;
 
 public class RegisterErrorExceptionMapper
 {
     public System.Exception ToException(IEnumerable<IdentityError> resultErrors)
     {
-        var result = ToException(resultErrors.First());
-        if (result is null) return new RegisterException(resultErrors);
+        var errorsList = resultErrors.ToList();
+        var result = ToException(errorsList.First());
+        if (result is null) return new RegisterException(errorsList);
         return result!;
     }
 
@@ -21,8 +22,8 @@ public class RegisterErrorExceptionMapper
             "PasswordRequiresNonAlphanumeric" => new InvalidPasswordException("Password must contain a non alphanumeric character"),
             "PasswordRequiresDigit" => new InvalidPasswordException("Password must contain a digit"),
             "PasswordRequiresUpper" => new InvalidPasswordException("Password must contain an upper case character"),
-            "DuplicateUserName" => EntityAlreadyExistsException.Create<User>("username"),
-            "DuplicateEmail" => EntityAlreadyExistsException.Create<User>("email"),
+            "DuplicateUserName" => EntityAlreadyExistsException.Create<UserEntity>("username"),
+            "DuplicateEmail" => EntityAlreadyExistsException.Create<UserEntity>("email"),
             _ => null,
         };
     }

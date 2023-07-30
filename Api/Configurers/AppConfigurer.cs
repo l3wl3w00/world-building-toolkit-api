@@ -1,4 +1,5 @@
-﻿using Hellang.Middleware.ProblemDetails;
+﻿using Bll.Auth;
+using Hellang.Middleware.ProblemDetails;
 
 namespace Api.Configurers;
 internal class AppConfigurer
@@ -26,7 +27,7 @@ internal class AppConfigurer
         }
 
         _app.UseHttpsRedirection();
-
+        _app.UseAuthentication();
         _app.UseAuthorization();
 
         _app.MapControllers();

@@ -1,16 +1,26 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using Bll.Auth;
 using Bll.Auth.Exception;
+using Bll.Auth.Settings;
 using Bll.Common.Exception;
 using Bll.Common.Mapper;
+using Bll.User;
 using Bll.World;
 using Dal;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Dal.Entities;
 using Hellang.Middleware.ProblemDetails;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using ProblemDetailsOptions = Hellang.Middleware.ProblemDetails.ProblemDetailsOptions;
+using Microsoft.Extensions.Logging;
+using Constants = Bll.Auth.Settings.Constants;
 
 namespace Api.Configurers;
 internal class BuilderConfigurer
@@ -29,16 +39,56 @@ internal class BuilderConfigurer
 
     private void Configure()
     {
-        _services.AddControllers().AddJsonOptions(options =>
+        Database();
+        SetAuthentication(); // this has to be after the identity EF config
+        SetOptions();
+        Controllers();
+        ProblemDetails();
+        RegisterServices();
+        Logging();
+        _services.AddEndpointsApiExplorer();
+        _services.AddSwaggerGen();
+
+    }
+
+    private void SetAuthentication()
+    {
+        _services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
+                options.DefaultScheme = GoogleDefaults.AuthenticationScheme;   
+            })
+            .AddScheme<AuthenticationSchemeOptions, GoogleTokenHandler>(GoogleDefaults.AuthenticationScheme, null);
+
+    }
+
+    private void SetOptions()
+    {
+        _config["Authentication:Google:RedirectUri"] = Constants.GoogleRedirectUri;
+        _services.Configure<GoogleOAuthSettings>(_config.GetSection("Authentication:Google"));
+    }
+
+    private void Logging()
+    {
+        _services.AddLogging(builder =>
         {
-            options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+            builder.AddConsole();
+            builder.AddDebug();
         });
-        _services.AddDbContext<WorldBuilderDbContext>(options =>
-            options.UseSqlServer(_config.GetConnectionString("WorldBuilderDb")));
-        
-        _services.AddIdentity<User, IdentityRole<Guid>>()
-            .AddEntityFrameworkStores<WorldBuilderDbContext>()
-            .AddDefaultTokenProviders();
+    }
+
+    private void RegisterServices()
+    {
+        _services.AddAutoMapper(typeof(WorldBuilderProfile));
+        _services.AddTransient<IWorldService, WorldService>();
+        _services.AddTransient<RegisterErrorExceptionMapper>();
+        _services.AddTransient<IUserService, UserService>();
+        _services.AddTransient<IAuthService, AuthService>();
+    }
+
+    private void ProblemDetails()
+    {
         _services.AddProblemDetails(options =>
         {
             var configurer = new ProblemDetailsConfigurer(options);
@@ -47,18 +97,31 @@ internal class BuilderConfigurer
             configurer.CreateMapping<InvalidPasswordException>(StatusCodes.Status400BadRequest);
             configurer.CreateMapping<NotSupportedLoginTypeException>(StatusCodes.Status400BadRequest);
             configurer.CreateMapping<RegisterException>(StatusCodes.Status500InternalServerError);
-            configurer.CreateMapping<LoginException>(StatusCodes.Status500InternalServerError);
+            configurer.CreateMapping<LoginException>(StatusCodes.Status401Unauthorized);
+            configurer.CreateMapping<UserRegisteredThroughOAuthException>(StatusCodes.Status401Unauthorized);
+            configurer.CreateMapping<GoogleJwtGenerationException>(StatusCodes.Status401Unauthorized);
         });
-        _services.AddAutoMapper(typeof(WorldBuilderProfile));
-        _services.AddTransient<IWorldService, WorldService>();
-        _services.AddTransient<RegisterErrorExceptionMapper>();
-        _services.AddTransient<IUserService, UserService>();
-        _services.AddEndpointsApiExplorer();
-        _services.AddSwaggerGen();
-
     }
 
-    private class ProblemDetailsConfigurer
+    private void Database()
+    {
+        _services.AddDbContext<WorldBuilderDbContext>(options =>
+            options.UseSqlServer(_config.GetConnectionString("WorldBuilderDb")));
+
+        _services.AddIdentity<User, IdentityRole<Guid>>()
+            .AddEntityFrameworkStores<WorldBuilderDbContext>()
+            .AddDefaultTokenProviders();
+    }
+
+    private void Controllers()
+    {
+        var converter = new JsonStringEnumConverter(JsonNamingPolicy.CamelCase);
+        _services.AddControllers().AddJsonOptions(options =>
+                options.JsonSerializerOptions.Converters.Add(converter)
+        );
+    }
+
+    private sealed class ProblemDetailsConfigurer
     {
         private readonly ProblemDetailsOptions _options;
 

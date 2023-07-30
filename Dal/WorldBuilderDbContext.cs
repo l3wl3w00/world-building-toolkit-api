@@ -31,9 +31,17 @@ public class WorldBuilderDbContext : IdentityDbContext<User, IdentityRole<Guid>,
             user.HasMany(u => u.Worlds).
                 WithOne(w => w.Creator);
         });
-        
+
+        builder.Entity<Continent>(continent =>
+        {
+            continent
+                .HasOne(c => c.World)
+                .WithMany(w => w.Continents)
+                .HasForeignKey(c => c.WorldId);
+            continent.OwnsMany(c => c.Bounds);
+        });
     }
 
     public DbSet<World> Worlds => Set<World>();
-    
+    public DbSet<Continent> Continents => Set<Continent>();
 }

@@ -23,9 +23,12 @@ public class WorldService : IWorldService
         _mapper = mapper;
     }
 
-    public async Task<ICollection<WorldDto>> GetAll()
+    public async Task<ICollection<WorldSummaryDto>> GetAll(Dal.Entities.User user)
     {
-        throw new NotImplementedException();
+        return await _dbContext.Worlds
+            .Where(w => w.CreatorUsername == user.UserName)
+            .ProjectTo<WorldSummaryDto>(_mapper.ConfigurationProvider)
+            .ToListAsync();
     }
 
     public async Task<WorldDto> Get(Guid guid)
@@ -33,7 +36,7 @@ public class WorldService : IWorldService
         return await _dbContext.Worlds
             .Where(w => w.Id == guid)
             .ProjectTo<WorldDto>(_mapper.ConfigurationProvider)
-            .SingleOrDo(() => EntityNotFoundException.Throw<WorldEntity>(guid));
+            .SingleOrDo(() => throw EntityNotFoundException.Create<WorldEntity>(guid));
     }
     
     public async Task<WorldDto> Create(CreateWorldDto createWorldDto)

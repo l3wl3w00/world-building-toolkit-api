@@ -4,8 +4,10 @@ using System.Text.Json.Serialization;
 using Bll.Auth;
 using Bll.Auth.Exception;
 using Bll.Auth.Settings;
+using Bll.Common;
 using Bll.Common.Exception;
 using Bll.Common.Mapper;
+using Bll.Continent.Service;
 using Bll.User;
 using Bll.World;
 using Dal;
@@ -20,7 +22,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using ProblemDetailsOptions = Hellang.Middleware.ProblemDetails.ProblemDetailsOptions;
 using Microsoft.Extensions.Logging;
-using Constants = Bll.Auth.Settings.Constants;
 
 namespace Api.Configurers;
 internal class BuilderConfigurer
@@ -85,6 +86,7 @@ internal class BuilderConfigurer
         _services.AddTransient<RegisterErrorExceptionMapper>();
         _services.AddTransient<IUserService, UserService>();
         _services.AddTransient<IAuthService, AuthService>();
+        _services.AddTransient<IContinentService, ContinentService>();
     }
 
     private void ProblemDetails()

@@ -1,3 +1,5 @@
-﻿namespace Bll.World.Dto;
+﻿using Bll.Continent.Dto;
 
-public record WorldDto(Guid Id, string Name, string? Description);
+namespace Bll.World.Dto;
+
+public record WorldDto(Guid Id, string Name, string? Description, ICollection<ContinentDto> Continents);

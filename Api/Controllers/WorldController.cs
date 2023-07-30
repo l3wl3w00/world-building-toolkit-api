@@ -1,7 +1,10 @@
+using System.Collections;
+using Bll.Auth;
+using Bll.Common;
 using Bll.World;
 using Microsoft.AspNetCore.Mvc;
 using Bll.World.Dto;
-using Microsoft.AspNetCore.Authentication.Google;
+using Dal.Entities;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers;
@@ -21,6 +24,17 @@ public class WorldController : ControllerBase
     public async Task<ActionResult<WorldDto>> Get(Guid guid)
     {
         return await _worldService.Get(guid);
+    }
+    
+    
+    [HttpGet]
+    [Authorize]
+    public async Task<ActionResult<ICollection<WorldSummaryDto>>> GetAllForUser()
+    {
+        
+        var worlds =  await _worldService.GetAll(HttpContext.GetUserEntity());
+
+        return Ok(worlds);
     }
 
     [HttpPost]

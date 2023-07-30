@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Dal.Entities;
 using Bll.Auth.Dto;
+using Bll.Continent.Dto;
 using Bll.World.Dto;
 using WorldEntity = Dal.Entities.World;
 
@@ -11,6 +12,8 @@ public class WorldBuilderProfile : Profile
     public WorldBuilderProfile()
     {
         World();
+        Continent();
+        WorldCoordinate();
         UserIdentity();
     }
 
@@ -24,5 +27,16 @@ public class WorldBuilderProfile : Profile
     {
         CreateMap<CreateWorldDto, WorldEntity>();
         CreateMap<WorldDto, WorldEntity>().ReverseMap();
+        CreateMap<WorldEntity, WorldSummaryDto>();
+    }
+    private void Continent()
+    {
+        CreateMap<CreateContinentDto, Dal.Entities.Continent>();
+        CreateMap<Dal.Entities.Continent, ContinentDto>();
+    }
+    
+    private void WorldCoordinate()
+    {
+        CreateMap<WorldCoordinate, WorldCoordinateDto>().ReverseMap();
     }
 }

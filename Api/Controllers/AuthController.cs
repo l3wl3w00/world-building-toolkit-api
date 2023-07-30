@@ -4,6 +4,7 @@ using Bll.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Bll.Auth.Dto;
 using Bll.Auth.Settings;
+using Bll.Common;
 using Bll.User;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;

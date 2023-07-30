@@ -29,6 +29,7 @@ internal class AppConfigurer
         _app.UseHttpsRedirection();
         _app.UseAuthentication();
         _app.UseAuthorization();
+        _app.UseMiddleware<UserResolverMiddleware>();
 
         _app.MapControllers();
     }

@@ -22,6 +22,29 @@ namespace Dal.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Dal.Entities.Continent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("WorldId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorldId");
+
+                    b.ToTable("Continents");
+                });
+
             modelBuilder.Entity("Dal.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -109,6 +132,9 @@ namespace Dal.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<float>("Radius")
+                        .HasColumnType("real");
 
                     b.HasKey("Id");
 
@@ -249,6 +275,47 @@ namespace Dal.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Dal.Entities.Continent", b =>
+                {
+                    b.HasOne("Dal.Entities.World", "World")
+                        .WithMany("Continents")
+                        .HasForeignKey("WorldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsMany("Dal.Entities.WorldCoordinate", "Bounds", b1 =>
+                        {
+                            b1.Property<Guid>("ContinentId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<float>("Phi")
+                                .HasColumnType("real");
+
+                            b1.Property<float>("Radius")
+                                .HasColumnType("real");
+
+                            b1.Property<float>("Theta")
+                                .HasColumnType("real");
+
+                            b1.HasKey("ContinentId", "Id");
+
+                            b1.ToTable("WorldCoordinate");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ContinentId");
+                        });
+
+                    b.Navigation("Bounds");
+
+                    b.Navigation("World");
+                });
+
             modelBuilder.Entity("Dal.Entities.World", b =>
                 {
                     b.HasOne("Dal.Entities.User", "Creator")
@@ -315,6 +382,11 @@ namespace Dal.Migrations
             modelBuilder.Entity("Dal.Entities.User", b =>
                 {
                     b.Navigation("Worlds");
+                });
+
+            modelBuilder.Entity("Dal.Entities.World", b =>
+                {
+                    b.Navigation("Continents");
                 });
 #pragma warning restore 612, 618
         }

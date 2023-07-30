@@ -106,7 +106,7 @@ public class UserService : IUserService
 
     }
 
-    private async Task<UserEntity> GetByEmail(string email)
+    public async Task<UserEntity> GetByEmail(string email)
     {
         return await GetBy(u => u.Email!, email, nameof(email));
     }

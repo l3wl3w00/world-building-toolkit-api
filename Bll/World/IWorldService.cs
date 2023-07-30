@@ -4,7 +4,7 @@ namespace Bll.World;
 
 public interface IWorldService
 {
-    Task<ICollection<WorldDto>> GetAll();
+    Task<ICollection<WorldSummaryDto>> GetAll(Dal.Entities.User user);
     Task<WorldDto> Get(Guid guid);
     Task<WorldDto> Create(CreateWorldDto createWorldDto);
 }

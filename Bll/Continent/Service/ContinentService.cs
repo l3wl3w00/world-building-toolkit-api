@@ -18,10 +18,10 @@ public class ContinentService : IContinentService
         _mapper = mapper;
     }
 
-    public async Task<ContinentDto> Create(Guid worldId, CreateContinentDto createContinentDto)
+    public async Task<ContinentDto> Create(Guid planetId, CreateContinentDto createContinentDto)
     {
         var continent = _mapper.Map<Dal.Entities.Continent>(createContinentDto);
-        continent.WorldId = worldId;
+        continent.PlanetId = planetId;
         await _dbContext.Continents.AddAsync(continent);
         try
         {
@@ -29,7 +29,7 @@ public class ContinentService : IContinentService
         }
         catch (DbUpdateException)
         {
-            throw EntityNotFoundException.Create<Dal.Entities.World>(continent.WorldId);
+            throw EntityNotFoundException.Create<Dal.Entities.Planet>(continent.PlanetId);
         }
         return _mapper.Map<ContinentDto>(continent);
     }

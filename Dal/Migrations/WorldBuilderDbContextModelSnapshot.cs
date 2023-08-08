@@ -17,7 +17,7 @@ namespace Dal.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.9")
+                .HasAnnotation("ProductVersion", "7.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -35,14 +35,43 @@ namespace Dal.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("WorldId")
+                    b.Property<Guid>("PlanetId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("WorldId");
+                    b.HasIndex("PlanetId");
 
                     b.ToTable("Continents");
+                });
+
+            modelBuilder.Entity("Dal.Entities.Planet", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CreatorUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<float>("Radius")
+                        .HasColumnType("real");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatorUsername", "Name")
+                        .IsUnique();
+
+                    b.ToTable("Planets");
                 });
 
             modelBuilder.Entity("Dal.Entities.User", b =>
@@ -114,35 +143,6 @@ namespace Dal.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Dal.Entities.World", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("CreatorUsername")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(256)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<float>("Radius")
-                        .HasColumnType("real");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CreatorUsername", "Name")
-                        .IsUnique();
-
-                    b.ToTable("Worlds");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -278,13 +278,13 @@ namespace Dal.Migrations
 
             modelBuilder.Entity("Dal.Entities.Continent", b =>
                 {
-                    b.HasOne("Dal.Entities.World", "World")
+                    b.HasOne("Dal.Entities.Planet", "Planet")
                         .WithMany("Continents")
-                        .HasForeignKey("WorldId")
+                        .HasForeignKey("PlanetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("Dal.Entities.WorldCoordinate", "Bounds", b1 =>
+                    b.OwnsMany("Dal.Entities.PlanetCoordinate", "Bounds", b1 =>
                         {
                             b1.Property<Guid>("ContinentId")
                                 .HasColumnType("uniqueidentifier");
@@ -306,7 +306,7 @@ namespace Dal.Migrations
 
                             b1.HasKey("ContinentId", "Id");
 
-                            b1.ToTable("WorldCoordinate");
+                            b1.ToTable("PlanetCoordinate");
 
                             b1.WithOwner()
                                 .HasForeignKey("ContinentId");
@@ -314,13 +314,13 @@ namespace Dal.Migrations
 
                     b.Navigation("Bounds");
 
-                    b.Navigation("World");
+                    b.Navigation("Planet");
                 });
 
-            modelBuilder.Entity("Dal.Entities.World", b =>
+            modelBuilder.Entity("Dal.Entities.Planet", b =>
                 {
                     b.HasOne("Dal.Entities.User", "Creator")
-                        .WithMany("Worlds")
+                        .WithMany("Planets")
                         .HasForeignKey("CreatorUsername")
                         .HasPrincipalKey("UserName")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -380,14 +380,14 @@ namespace Dal.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Dal.Entities.User", b =>
-                {
-                    b.Navigation("Worlds");
-                });
-
-            modelBuilder.Entity("Dal.Entities.World", b =>
+            modelBuilder.Entity("Dal.Entities.Planet", b =>
                 {
                     b.Navigation("Continents");
+                });
+
+            modelBuilder.Entity("Dal.Entities.User", b =>
+                {
+                    b.Navigation("Planets");
                 });
 #pragma warning restore 612, 618
         }

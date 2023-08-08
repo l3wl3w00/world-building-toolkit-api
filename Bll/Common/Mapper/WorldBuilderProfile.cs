@@ -2,8 +2,7 @@
 using Dal.Entities;
 using Bll.Auth.Dto;
 using Bll.Continent.Dto;
-using Bll.World.Dto;
-using WorldEntity = Dal.Entities.World;
+using Bll.Planet.Dto;
 
 namespace Bll.Common.Mapper;
 
@@ -11,9 +10,9 @@ public class WorldBuilderProfile : Profile
 {
     public WorldBuilderProfile()
     {
-        World();
+        Planet();
         Continent();
-        WorldCoordinate();
+        PlanetCoordinate();
         UserIdentity();
     }
 
@@ -23,11 +22,11 @@ public class WorldBuilderProfile : Profile
         CreateMap<Dal.Entities.User, UserIdentityDto>().ReverseMap();
     }
 
-    private void World()
+    private void Planet()
     {
-        CreateMap<CreateWorldDto, WorldEntity>();
-        CreateMap<WorldDto, WorldEntity>().ReverseMap();
-        CreateMap<WorldEntity, WorldSummaryDto>();
+        CreateMap<CreatePlanetDto, Dal.Entities.Planet>();
+        CreateMap<PlanetDto, Dal.Entities.Planet>().ReverseMap();
+        CreateMap<Dal.Entities.Planet, PlanetSummaryDto>();
     }
     private void Continent()
     {
@@ -35,8 +34,8 @@ public class WorldBuilderProfile : Profile
         CreateMap<Dal.Entities.Continent, ContinentDto>();
     }
     
-    private void WorldCoordinate()
+    private void PlanetCoordinate()
     {
-        CreateMap<WorldCoordinate, WorldCoordinateDto>().ReverseMap();
+        CreateMap<PlanetCoordinate, PlanetCoordinateDto>().ReverseMap();
     }
 }

@@ -4,5 +4,5 @@ namespace Dal.Entities;
 
 public class User : IdentityUser<Guid>
 {
-    public ICollection<World> Worlds { get; set; } = new List<World>();
+    public ICollection<Planet> Planets { get; set; } = new List<Planet>();
 }

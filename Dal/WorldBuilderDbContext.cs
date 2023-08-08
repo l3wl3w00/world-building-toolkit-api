@@ -13,10 +13,10 @@ public class WorldBuilderDbContext : IdentityDbContext<User, IdentityRole<Guid>,
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.Entity<World>(world =>
+        builder.Entity<Planet>(world =>
         {
             world.HasOne(w => w.Creator)
-                .WithMany(u => u.Worlds)
+                .WithMany(u => u.Planets)
                 .HasPrincipalKey(u => u.UserName)
                 .HasForeignKey(w => w.CreatorUsername);
             
@@ -28,20 +28,20 @@ public class WorldBuilderDbContext : IdentityDbContext<User, IdentityRole<Guid>,
         {
             user.HasIndex(u => u.Email).IsUnique();
             user.HasAlternateKey(u => u.UserName);
-            user.HasMany(u => u.Worlds).
+            user.HasMany(u => u.Planets).
                 WithOne(w => w.Creator);
         });
 
         builder.Entity<Continent>(continent =>
         {
             continent
-                .HasOne(c => c.World)
+                .HasOne(c => c.Planet)
                 .WithMany(w => w.Continents)
-                .HasForeignKey(c => c.WorldId);
+                .HasForeignKey(c => c.PlanetId);
             continent.OwnsMany(c => c.Bounds);
         });
     }
 
-    public DbSet<World> Worlds => Set<World>();
+    public DbSet<Planet> Planets => Set<Planet>();
     public DbSet<Continent> Continents => Set<Continent>();
 }

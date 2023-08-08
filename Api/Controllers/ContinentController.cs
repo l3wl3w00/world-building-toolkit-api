@@ -14,9 +14,9 @@ public class ContinentController : ControllerBase
         _continentService = continentService;
     }
 
-    [HttpPost("world/{worldid:guid}/continent")]
-    public async Task<ActionResult<ContinentDto>> CreateContinent(Guid worldId, CreateContinentDto createContinentDto)
+    [HttpPost("planet/{planetid:guid}/continent")]
+    public async Task<ActionResult<ContinentDto>> CreateContinent(Guid planetId, CreateContinentDto createContinentDto)
     {
-        return await _continentService.Create(worldId, createContinentDto);
+        return await _continentService.Create(planetId, createContinentDto);
     }
 }

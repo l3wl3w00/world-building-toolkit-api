@@ -11,7 +11,7 @@ using Bll.Common.Exception;
 using Bll.Common.Mapper;
 using Bll.Continent.Service;
 using Bll.User;
-using Bll.World;
+using Bll.Planet;
 using Dal;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -116,7 +116,7 @@ internal class BuilderConfigurer
     private void RegisterServices()
     {
         _services.AddAutoMapper(typeof(WorldBuilderProfile));
-        _services.AddTransient<IWorldService, WorldService>();
+        _services.AddTransient<IPlanetService, PlanetService>();
         _services.AddTransient<RegisterErrorExceptionMapper>();
         _services.AddTransient<IUserService, UserService>();
         _services.AddTransient<IAuthService, AuthService>();

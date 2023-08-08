@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Dal.Entities;
 
-public class World
+public class Planet
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;

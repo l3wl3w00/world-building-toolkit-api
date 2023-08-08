@@ -25,8 +25,12 @@ public class UserResolverMiddleware
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 
         var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-        if (string.IsNullOrEmpty(token)) throw new InvalidJwtException("No token was provided in the Authorization header");
-        
+        if (string.IsNullOrEmpty(token))
+        {
+            await _next(context);
+            return;
+        }
+
         var handler = new JwtSecurityTokenHandler();
         var jwtToken = handler.ReadJwtToken(token);
         var emailClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "email") ?? throw new NoClaimInTokenException("email");

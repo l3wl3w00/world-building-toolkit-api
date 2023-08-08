@@ -1,8 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text.Json;
 using AutoMapper;
 using Bll.Auth.Dto;
 using Bll.Auth.Exception;
+using Bll.Auth.Jwt;
 using Bll.Auth.Settings;
 using Bll.User;
 using Microsoft.AspNetCore.Identity;
@@ -16,13 +18,13 @@ public class AuthService : IAuthService
     private readonly GoogleOAuthSettings _googleOAuthValues;
     private readonly IUserService _userService;
     private readonly UserManager<Dal.Entities.User> _userManager;
-    private readonly IMapper _mapper;
+    private readonly IJwtTokenProvider _jwtTokenProvider;
 
-    public AuthService(IOptions<GoogleOAuthSettings> googleOAuthOptions, IUserService userService, UserManager<Dal.Entities.User> userManager, IMapper mapper)
+    public AuthService(IOptions<GoogleOAuthSettings> googleOAuthOptions, IUserService userService, UserManager<Dal.Entities.User> userManager, IJwtTokenProvider jwtTokenProvider)
     {
         _userService = userService;
         _userManager = userManager;
-        _mapper = mapper;
+        _jwtTokenProvider = jwtTokenProvider;
         _googleOAuthValues = googleOAuthOptions.Value;
     }
 
@@ -31,9 +33,14 @@ public class AuthService : IAuthService
         var user = await _userService.FindUserByLogin(loginDto);
         var passwordHash = user.PasswordHash ?? throw new UserRegisteredThroughOAuthException();
         var result = _userManager.PasswordHasher.VerifyHashedPassword(user,passwordHash, loginDto.Password);
-        if (result == PasswordVerificationResult.Success)
-            return _mapper.Map<UserIdentityDto>(user);
-        throw new LoginException();
+        if (result != PasswordVerificationResult.Success) throw new LoginException();
+
+        var token = _jwtTokenProvider.Generate(new Dictionary<string, string>
+        {
+            { "email", user.Email },
+            { "username", user.UserName },
+        });
+        return new UserIdentityDto(user.UserName, user.Email, token);
     }
 
     // Should be abstracted if more oauth provider

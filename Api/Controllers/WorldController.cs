@@ -5,6 +5,8 @@ using Bll.World;
 using Microsoft.AspNetCore.Mvc;
 using Bll.World.Dto;
 using Dal.Entities;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers;
@@ -20,7 +22,7 @@ public class WorldController : ControllerBase
     }
 
     [HttpGet("{guid:guid}")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = GoogleDefaults.AuthenticationScheme + "," + JwtBearerDefaults.AuthenticationScheme)]
     public async Task<ActionResult<WorldDto>> Get(Guid guid)
     {
         return await _worldService.Get(guid);

@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Bll.Auth;
 using Bll.Auth.Exception;
+using Bll.Auth.Jwt;
 using Bll.Auth.Settings;
 using Bll.Common;
 using Bll.Common.Exception;
@@ -20,19 +22,27 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Server.HttpSys;
 using ProblemDetailsOptions = Hellang.Middleware.ProblemDetails.ProblemDetailsOptions;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Configurers;
 internal class BuilderConfigurer
 {
     private readonly IServiceCollection _services;
     private readonly IConfiguration _config;
+    private readonly JwtGenerationSettings _jwtGenerationSettings = new();
+    private readonly IConfigurationSection _jwtSection;
 
     internal BuilderConfigurer(IServiceCollection services, IConfiguration config)
     {
         this._services = services;
         this._config = config;
+        
+        _jwtSection = _config.GetSection("Authentication:Jwt");
+        _jwtSection.Bind(_jwtGenerationSettings);
     }
 
     internal static void Configure(WebApplicationBuilder builder) => 
@@ -54,20 +64,44 @@ internal class BuilderConfigurer
 
     private void SetAuthentication()
     {
-        _services.AddAuthentication(options =>
+        _services.AddAuthentication()
+            .AddScheme<AuthenticationSchemeOptions, GoogleTokenHandler>(GoogleDefaults.AuthenticationScheme, null)
+            .AddJwtBearer(bearerOptions =>
             {
-                options.DefaultAuthenticateScheme = GoogleDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-                options.DefaultScheme = GoogleDefaults.AuthenticationScheme;   
-            })
-            .AddScheme<AuthenticationSchemeOptions, GoogleTokenHandler>(GoogleDefaults.AuthenticationScheme, null);
+                bearerOptions.TokenValidationParameters = new()
+                {
+                    // The signing key must match!
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtGenerationSettings.Secret)),
 
+                    // Validate the JWT Issuer (iss) claim
+                    ValidateIssuer = true,
+                    ValidIssuer = _jwtGenerationSettings.Issuer,
+
+                    // Validate the JWT Audience (aud) claim
+                    ValidateAudience = true,
+                    ValidAudience = _jwtGenerationSettings.Audience,
+
+                    // Validate the token expiry
+                    ValidateLifetime = true,
+                };
+            });
+        _services.AddAuthorization(options =>
+        {
+            var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(
+                JwtBearerDefaults.AuthenticationScheme,
+                GoogleDefaults.AuthenticationScheme);
+            defaultAuthorizationPolicyBuilder = 
+                defaultAuthorizationPolicyBuilder.RequireAuthenticatedUser();
+            options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
+        });
     }
 
     private void SetOptions()
     {
         _config["Authentication:Google:RedirectUri"] = Constants.GoogleRedirectUri;
         _services.Configure<GoogleOAuthSettings>(_config.GetSection("Authentication:Google"));
+        _services.Configure<JwtGenerationSettings>(_jwtSection);
     }
 
     private void Logging()
@@ -87,6 +121,7 @@ internal class BuilderConfigurer
         _services.AddTransient<IUserService, UserService>();
         _services.AddTransient<IAuthService, AuthService>();
         _services.AddTransient<IContinentService, ContinentService>();
+        _services.AddTransient<IJwtTokenProvider, JwtTokenProvider>();
     }
 
     private void ProblemDetails()

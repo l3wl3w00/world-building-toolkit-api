@@ -18,7 +18,7 @@ namespace Dal.Migrations
                 table: "Worlds",
                 type: "uniqueidentifier",
                 nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                defaultValue: Guid.Empty);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Worlds_UserId",

@@ -10,7 +10,7 @@ public class World
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;
-    public string? Description { get; set; }
+    public string Description { get; set; } = null!;
     public string CreatorUsername { get; set; } = null!;
     public User Creator { get; set; } = null!;
     public float Radius { get; set; }

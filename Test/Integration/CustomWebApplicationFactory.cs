@@ -14,14 +14,13 @@ namespace Test.Integration
 {
     public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
-        const string ConnectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=worldbuilder;Integrated Security=True;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False";
         protected override IHost CreateHost(IHostBuilder builder)
         {
             builder.UseEnvironment("Development");
             builder.ConfigureServices(services =>
             {
                 services.AddScoped(sp => new DbContextOptionsBuilder<WorldBuilderDbContext>()
-                        .UseSqlServer(ConnectionString)
+                        .UseInMemoryDatabase("TestDb")
                         .UseApplicationServiceProvider(sp)
                         .Options);
             });

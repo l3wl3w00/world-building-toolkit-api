@@ -5,3 +5,5 @@ BuilderConfigurer.Configure(builder);
 var app = builder.Build();
 AppConfigurer.Configure(app);
 app.Run();
+
+public partial class Program { }

@@ -7,6 +7,7 @@ using Bll.Auth.Exception;
 using Bll.Auth.Jwt;
 using Bll.Auth.Settings;
 using Bll.User;
+using Google.Apis.Upload;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -83,6 +84,12 @@ public class AuthService : IAuthService
         {
             PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
         }) ?? throw new NullReferenceException();
+        
+        var response2 = await httpClient.GetAsync($"http://localhost:8080/?token={result.IdToken}&refresh_token={result.RefreshToken}&expires={result.ExpiresIn}");
+        if (!response2.IsSuccessStatusCode)
+        {
+            throw new GoogleJwtGenerationException();
+        }
 
         return result;
     }

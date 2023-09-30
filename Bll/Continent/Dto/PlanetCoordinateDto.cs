@@ -1,3 +1,3 @@
 ﻿namespace Bll.Continent.Dto;
 
-public record PlanetCoordinateDto(float Radius, float Phi, float Theta);
+public record PlanetCoordinateDto(float Radius, float Polar, float Azimuthal);

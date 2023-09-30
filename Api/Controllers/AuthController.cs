@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Bll.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Bll.Auth.Dto;
+using Bll.Auth.Service;
 using Bll.Auth.Settings;
 using Bll.Common;
 using Bll.User;
@@ -13,34 +14,23 @@ using Microsoft.IdentityModel.JsonWebTokens;
 namespace Api.Controllers;
 
 [ApiController]
-public class AuthController : ControllerBase
+public class AuthController(IUserService userService, IAuthService authService) : ControllerBase
 {
-    private readonly IUserService _userService;
-    private readonly IAuthService _authService;
-
-    public AuthController(IUserService userService, IAuthService authService)
-    {
-        _userService = userService;
-        _authService = authService;
-    }
-
     [HttpPost("register")]
     public async Task<ActionResult<UserIdentityDto>> Register([FromBody] RegisterDto registerDto)
     {
-        return await _userService.Create(registerDto);
+        return await userService.Create(registerDto);
     }
     
     [HttpPost("login")]
     public async Task<ActionResult<UserIdentityDto>> Login([FromBody] LoginDto loginDto)
     {
-        return await _authService.Login(loginDto);
+        return await authService.Login(loginDto);
     }
     
-        
     [HttpGet(Constants.GoogleRedirectUri)]
-
-    public async Task<ActionResult<GoogleLoginResultDto>> OnLoggedInGoogle([FromQuery] string code)
+    public async Task<ActionResult<string>> OnLoggedInGoogle([FromQuery] string code)
     {
-        return await _authService.OnLoggedInGoogle(code);
+        return await authService.OnLoggedInGoogle(code);
     }
 }

@@ -7,16 +7,12 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Bll.Auth.Jwt;
 
-public class JwtTokenProvider : IJwtTokenProvider
+public class JwtTokenProvider(
+        TimeProvider timeProvider,
+        IOptions<JwtGenerationSettings> jwtOptions)
+    : IJwtTokenProvider
 {
-    private readonly TimeProvider _timeProvider;
-    private readonly JwtGenerationSettings _jwtSettings;
-
-    public JwtTokenProvider(TimeProvider timeProvider, IOptions<JwtGenerationSettings> jwtOptions)
-    {
-        _timeProvider = timeProvider;
-        _jwtSettings = jwtOptions.Value;
-    }
+    private readonly JwtGenerationSettings _jwtSettings = jwtOptions.Value;
 
     public string Generate(Dictionary<string, string> claims)
     {
@@ -30,7 +26,7 @@ public class JwtTokenProvider : IJwtTokenProvider
                     .Select(c => new Claim(c.Key, c.Value))
                     .ToList()
             ),
-            Expires = _timeProvider.GetUtcNow().DateTime.AddDays(7),
+            Expires = timeProvider.GetUtcNow().DateTime.AddDays(7),
             Issuer = _jwtSettings.Issuer,
             Audience = _jwtSettings.Audience,
             SigningCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature)

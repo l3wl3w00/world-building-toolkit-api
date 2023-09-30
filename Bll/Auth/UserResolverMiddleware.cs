@@ -8,26 +8,17 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Bll.Auth;
 
-public class UserResolverMiddleware
+public class UserResolverMiddleware(RequestDelegate next, IServiceProvider serviceProvider)
 {
-    private readonly RequestDelegate _next;
-    private readonly IServiceProvider _serviceProvider;
-
-    public UserResolverMiddleware(RequestDelegate next, IServiceProvider serviceProvider)
-    {
-        _next = next;
-        _serviceProvider = serviceProvider;
-    }
-
     public async Task Invoke(HttpContext context)
     {
-        using var scope = _serviceProvider.CreateScope();
+        using var scope = serviceProvider.CreateScope();
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 
         var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
         if (string.IsNullOrEmpty(token))
         {
-            await _next(context);
+            await next(context);
             return;
         }
 
@@ -37,6 +28,6 @@ public class UserResolverMiddleware
         
         var user = await userService.GetByEmail(emailClaim.Value);
         context.Items[Constants.UserKey] = user;
-        await _next(context);
+        await next(context);
     }
 }

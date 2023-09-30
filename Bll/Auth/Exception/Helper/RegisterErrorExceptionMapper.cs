@@ -1,9 +1,8 @@
-﻿using Bll.Auth.Exception;
-using Bll.Common.Exception;
-using Dal.Entities;
+﻿using Bll.Common.Exception;
+using Bll.Common.Option;
 using Microsoft.AspNetCore.Identity;
 using UserEntity = Dal.Entities.User;
-namespace Bll.Auth;
+namespace Bll.Auth.Exception.Helper;
 
 public class RegisterErrorExceptionMapper
 {
@@ -11,11 +10,10 @@ public class RegisterErrorExceptionMapper
     {
         var errorsList = resultErrors.ToList();
         var result = ToException(errorsList.First());
-        if (result is null) return new RegisterException(errorsList);
-        return result!;
+        return result.MapIfNull(() => new RegisterException(errorsList));
     }
 
-    private System.Exception? ToException(IdentityError error)
+    private Option<System.Exception> ToException(IdentityError error)
     {
         return error.Code switch
         {
@@ -24,7 +22,7 @@ public class RegisterErrorExceptionMapper
             "PasswordRequiresUpper" => new InvalidPasswordException("Password must contain an upper case character"),
             "DuplicateUserName" => EntityAlreadyExistsException.Create<UserEntity>("username"),
             "DuplicateEmail" => EntityAlreadyExistsException.Create<UserEntity>("email"),
-            _ => null,
+            _ => Option<System.Exception>.None,
         };
     }
 }

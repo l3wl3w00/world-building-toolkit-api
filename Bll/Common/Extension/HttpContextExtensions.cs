@@ -1,8 +1,7 @@
 ﻿using Bll.Auth.Exception;
-using Bll.Common;
 using Microsoft.AspNetCore.Http;
 
-namespace Bll.Auth;
+namespace Bll.Common.Extension;
 
 public static class HttpContextExtensions
 {

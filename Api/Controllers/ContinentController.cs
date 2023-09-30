@@ -5,18 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers;
 
 [ApiController]
-public class ContinentController : ControllerBase
+public class ContinentController(IContinentService continentService) : ControllerBase
 {
-    private readonly IContinentService _continentService;
-
-    public ContinentController(IContinentService continentService)
-    {
-        _continentService = continentService;
-    }
-
     [HttpPost("planet/{planetid:guid}/continent")]
     public async Task<ActionResult<ContinentDto>> CreateContinent(Guid planetId, CreateContinentDto createContinentDto)
     {
-        return await _continentService.Create(planetId, createContinentDto);
+        return await continentService.Create(planetId, createContinentDto);
     }
 }

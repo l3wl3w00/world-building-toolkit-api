@@ -1,42 +1,32 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text.Json;
-using AutoMapper;
 using Bll.Auth.Dto;
 using Bll.Auth.Exception;
 using Bll.Auth.Jwt;
 using Bll.Auth.Settings;
 using Bll.User;
-using Google.Apis.Upload;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace Bll.Auth;
+namespace Bll.Auth.Service;
 
-public class AuthService : IAuthService
+public class AuthService(
+        IOptions<GoogleOAuthSettings> googleOAuthOptions,
+        IUserService userService,
+        UserManager<Dal.Entities.User> userManager, 
+        IJwtTokenProvider jwtTokenProvider)
+    : IAuthService
 {
-    private readonly GoogleOAuthSettings _googleOAuthValues;
-    private readonly IUserService _userService;
-    private readonly UserManager<Dal.Entities.User> _userManager;
-    private readonly IJwtTokenProvider _jwtTokenProvider;
-
-    public AuthService(IOptions<GoogleOAuthSettings> googleOAuthOptions, IUserService userService, UserManager<Dal.Entities.User> userManager, IJwtTokenProvider jwtTokenProvider)
-    {
-        _userService = userService;
-        _userManager = userManager;
-        _jwtTokenProvider = jwtTokenProvider;
-        _googleOAuthValues = googleOAuthOptions.Value;
-    }
+    private readonly GoogleOAuthSettings _googleOAuthValues = googleOAuthOptions.Value;
 
     public async Task<UserIdentityDto> Login(LoginDto loginDto)
     {
-        var user = await _userService.FindUserByLogin(loginDto);
+        var user = await userService.FindUserByLogin(loginDto);
         var passwordHash = user.PasswordHash ?? throw new UserRegisteredThroughOAuthException();
-        var result = _userManager.PasswordHasher.VerifyHashedPassword(user,passwordHash, loginDto.Password);
+        var result = userManager.PasswordHasher.VerifyHashedPassword(user,passwordHash, loginDto.Password);
         if (result != PasswordVerificationResult.Success) throw new LoginException();
 
-        var token = _jwtTokenProvider.Generate(new Dictionary<string, string>
+        var token = jwtTokenProvider.Generate(new Dictionary<string, string>
         {
             { "email", user.Email },
             { "username", user.UserName },
@@ -45,7 +35,7 @@ public class AuthService : IAuthService
     }
 
     // Should be abstracted if more oauth provider
-    public async Task<GoogleLoginResultDto> OnLoggedInGoogle(string code)
+    public async Task<string> OnLoggedInGoogle(string code)
     {
         var response = await CreateTokenForGoogleAsync(code);
         var handler = new JwtSecurityTokenHandler();
@@ -54,8 +44,8 @@ public class AuthService : IAuthService
         var nameClaim = token!.Claims.First(c => c.Type == "name");
         var emailClaim = token.Claims.First(c => c.Type == "email");
 
-        var user = await _userService.GetOrCreateUser(new GoogleIdentity(nameClaim.Value, emailClaim.Value));
-        return new GoogleLoginResultDto(true, response.IdToken, user.Email);
+        var user = await userService.GetOrCreateUser(new GoogleIdentity(nameClaim.Value, emailClaim.Value));
+        return "Successfully logged in! You can now navigate back to the app!";
     }
 
     public async Task<IAuthService.GoogleTokenResponseDto> CreateTokenForGoogleAsync(string code)

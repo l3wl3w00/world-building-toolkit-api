@@ -42,7 +42,7 @@ namespace Dal.Migrations
 
                     b.HasIndex("PlanetId");
 
-                    b.ToTable("Continents");
+                    b.ToTable("Continents", (string)null);
                 });
 
             modelBuilder.Entity("Dal.Entities.Planet", b =>
@@ -71,7 +71,7 @@ namespace Dal.Migrations
                     b.HasIndex("CreatorUsername", "Name")
                         .IsUnique();
 
-                    b.ToTable("Planets");
+                    b.ToTable("Planets", (string)null);
                 });
 
             modelBuilder.Entity("Dal.Entities.User", b =>
@@ -284,7 +284,7 @@ namespace Dal.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("Dal.Entities.PlanetCoordinate", "Bounds", b1 =>
+                    b.OwnsMany("Dal.Entities.Continent.Bounds#Dal.Entities.PlanetCoordinate", "Bounds", b1 =>
                         {
                             b1.Property<Guid>("ContinentId")
                                 .HasColumnType("uniqueidentifier");
@@ -295,18 +295,18 @@ namespace Dal.Migrations
 
                             SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
 
-                            b1.Property<float>("Phi")
+                            b1.Property<float>("Azimuthal")
+                                .HasColumnType("real");
+
+                            b1.Property<float>("Polar")
                                 .HasColumnType("real");
 
                             b1.Property<float>("Radius")
                                 .HasColumnType("real");
 
-                            b1.Property<float>("Theta")
-                                .HasColumnType("real");
-
                             b1.HasKey("ContinentId", "Id");
 
-                            b1.ToTable("PlanetCoordinate");
+                            b1.ToTable("PlanetCoordinate", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("ContinentId");

@@ -8,7 +8,9 @@ using Dal;
 using Dal.Entities;
 using Bll.Auth.Dto;
 using Bll.Auth.Exception;
+using Bll.Auth.Exception.Helper;
 using Bll.Common;
+using Bll.Common.Extension;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,29 +18,19 @@ using Microsoft.IdentityModel.Tokens;
 namespace Bll.User;
 using UserEntity = Dal.Entities.User;
 
-public class UserService : IUserService
+public class UserService(
+        WorldBuilderDbContext dbContext,
+        IMapper mapper,
+        UserManager<UserEntity> userManager,
+        RegisterErrorExceptionMapper registerErrorHandler)
+    : IUserService
 {
-    private readonly WorldBuilderDbContext _dbContext;
-    private readonly UserManager<UserEntity> _userManager;
-    private readonly RegisterErrorExceptionMapper _registerErrorHandler;
-    private readonly IMapper _mapper;
-
-    public UserService(WorldBuilderDbContext dbContext, IMapper mapper, UserManager<UserEntity> userManager, RegisterErrorExceptionMapper registerErrorHandler)
-    {
-        _dbContext = dbContext;
-        _mapper = mapper;
-        _userManager = userManager;
-        _registerErrorHandler = registerErrorHandler;
-    }
-
-
-
     public async Task<UserIdentityDto> Create(RegisterDto registerDto)
     {
-        var user = _mapper.Map<UserEntity>(registerDto);
+        var user = mapper.Map<UserEntity>(registerDto);
         try
         {
-            return _mapper.Map<UserIdentityDto>(await Create(user, registerDto.Password));
+            return mapper.Map<UserIdentityDto>(await Create(user, registerDto.Password));
         }
         catch (DbUpdateException)
         {
@@ -52,14 +44,14 @@ public class UserService : IUserService
         IdentityResult result;
         if (password is null)
         {
-            result = await _userManager.CreateAsync(user);
+            result = await userManager.CreateAsync(user);
         }
         else
         {
-            result = await _userManager.CreateAsync(user, password);
+            result = await userManager.CreateAsync(user, password);
         }
         if (result.Succeeded) return user;
-        throw _registerErrorHandler.ToException(result.Errors);
+        throw registerErrorHandler.ToException(result.Errors);
     }
 
     public async Task<UserEntity> GetOrCreateUser(GoogleIdentity googleIdentity)
@@ -115,7 +107,7 @@ public class UserService : IUserService
     {
         var equality = Expression.Equal(userProperty.Body, Expression.Constant(value, typeof(T)));
 
-        return await _dbContext.Users
+        return await dbContext.Users
             .Where(Expression.Lambda<Func<UserEntity, bool>>(equality, userProperty.Parameters))
             .SingleOrDo(() => EntityNotFoundException.Throw<UserEntity>(valueName, value));
     }

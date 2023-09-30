@@ -29,8 +29,7 @@ public class PlanetControllerTests : IClassFixture<CustomWebApplicationFactory>
                 new
                 (
                     Name: "test planet", 
-                    Description: "test description",
-                    CreatorUsername: "nonexistent test user"
+                    Description: "test description"
                 )
             )
             .Generate();

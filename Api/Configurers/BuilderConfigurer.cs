@@ -4,7 +4,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Bll.Auth;
 using Bll.Auth.Exception;
+using Bll.Auth.Exception.Helper;
 using Bll.Auth.Jwt;
+using Bll.Auth.Service;
 using Bll.Auth.Settings;
 using Bll.Common;
 using Bll.Common.Exception;
@@ -29,27 +31,17 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Configurers;
-internal class BuilderConfigurer
+internal class BuilderConfigurer(IServiceCollection services, IConfiguration config)
 {
-    private readonly IServiceCollection _services;
-    private readonly IConfiguration _config;
     private readonly JwtGenerationSettings _jwtGenerationSettings = new();
-    private readonly IConfigurationSection _jwtSection;
-
-    internal BuilderConfigurer(IServiceCollection services, IConfiguration config)
-    {
-        this._services = services;
-        this._config = config;
-        
-        _jwtSection = _config.GetSection("Authentication:Jwt");
-        _jwtSection.Bind(_jwtGenerationSettings);
-    }
-
+    private readonly IConfigurationSection _jwtSection = config.GetSection("Authentication:Jwt");
+    
     internal static void Configure(WebApplicationBuilder builder) => 
         new BuilderConfigurer(builder.Services, builder.Configuration).Configure();
 
     private void Configure()
     {
+        _jwtSection.Bind(_jwtGenerationSettings);
         Database();
         SetAuthentication(); // this has to be after the identity EF config
         SetOptions();
@@ -57,14 +49,14 @@ internal class BuilderConfigurer
         ProblemDetails();
         RegisterServices();
         Logging();
-        _services.AddEndpointsApiExplorer();
-        _services.AddSwaggerGen();
+        services.AddEndpointsApiExplorer();
+        services.AddSwaggerGen();
 
     }
 
     private void SetAuthentication()
     {
-        _services.AddAuthentication()
+        services.AddAuthentication()
             .AddScheme<AuthenticationSchemeOptions, GoogleTokenHandler>(GoogleDefaults.AuthenticationScheme, null)
             .AddJwtBearer(bearerOptions =>
             {
@@ -86,7 +78,7 @@ internal class BuilderConfigurer
                     ValidateLifetime = true,
                 };
             });
-        _services.AddAuthorization(options =>
+        services.AddAuthorization(options =>
         {
             var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(
                 JwtBearerDefaults.AuthenticationScheme,
@@ -99,14 +91,14 @@ internal class BuilderConfigurer
 
     private void SetOptions()
     {
-        _config["Authentication:Google:RedirectUri"] = Constants.GoogleRedirectUri;
-        _services.Configure<GoogleOAuthSettings>(_config.GetSection("Authentication:Google"));
-        _services.Configure<JwtGenerationSettings>(_jwtSection);
+        config["Authentication:Google:RedirectUri"] = Constants.GoogleRedirectUri;
+        services.Configure<GoogleOAuthSettings>(config.GetSection("Authentication:Google"));
+        services.Configure<JwtGenerationSettings>(_jwtSection);
     }
 
     private void Logging()
     {
-        _services.AddLogging(builder =>
+        services.AddLogging(builder =>
         {
             builder.AddConsole();
             builder.AddDebug();
@@ -115,18 +107,18 @@ internal class BuilderConfigurer
 
     private void RegisterServices()
     {
-        _services.AddAutoMapper(typeof(WorldBuilderProfile));
-        _services.AddTransient<IPlanetService, PlanetService>();
-        _services.AddTransient<RegisterErrorExceptionMapper>();
-        _services.AddTransient<IUserService, UserService>();
-        _services.AddTransient<IAuthService, AuthService>();
-        _services.AddTransient<IContinentService, ContinentService>();
-        _services.AddTransient<IJwtTokenProvider, JwtTokenProvider>();
+        services.AddAutoMapper(typeof(WorldBuilderProfile));
+        services.AddTransient<IPlanetService, PlanetService>();
+        services.AddTransient<RegisterErrorExceptionMapper>();
+        services.AddTransient<IUserService, UserService>();
+        services.AddTransient<IAuthService, AuthService>();
+        services.AddTransient<IContinentService, ContinentService>();
+        services.AddTransient<IJwtTokenProvider, JwtTokenProvider>();
     }
 
     private void ProblemDetails()
     {
-        _services.AddProblemDetails(options =>
+        services.AddProblemDetails(options =>
         {
             var configurer = new ProblemDetailsConfigurer(options);
             configurer.CreateMapping<EntityNotFoundException>(StatusCodes.Status404NotFound);
@@ -142,10 +134,10 @@ internal class BuilderConfigurer
 
     private void Database()
     {
-        _services.AddDbContext<WorldBuilderDbContext>(options =>
-            options.UseSqlServer(_config.GetConnectionString("WorldBuilderDb")));
+        services.AddDbContext<WorldBuilderDbContext>(options =>
+            options.UseSqlServer(config.GetConnectionString("WorldBuilderDb")));
 
-        _services.AddIdentity<User, IdentityRole<Guid>>()
+        services.AddIdentity<User, IdentityRole<Guid>>()
             .AddEntityFrameworkStores<WorldBuilderDbContext>()
             .AddDefaultTokenProviders();
     }
@@ -153,7 +145,7 @@ internal class BuilderConfigurer
     private void Controllers()
     {
         var converter = new JsonStringEnumConverter(JsonNamingPolicy.CamelCase);
-        _services.AddControllers().AddJsonOptions(options =>
+        services.AddControllers().AddJsonOptions(options =>
                 options.JsonSerializerOptions.Converters.Add(converter)
         );
     }

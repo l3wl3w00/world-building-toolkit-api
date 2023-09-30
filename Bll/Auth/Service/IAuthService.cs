@@ -1,8 +1,6 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using Bll.Auth.Dto;
-using Microsoft.AspNetCore.Mvc;
+﻿using Bll.Auth.Dto;
 
-namespace Bll.Auth;
+namespace Bll.Auth.Service;
 
 public interface IAuthService
 {
@@ -17,5 +15,5 @@ public interface IAuthService
     Task<GoogleTokenResponseDto> CreateTokenForGoogleAsync(string code);
     public Task<UserIdentityDto> Login(LoginDto loginDto);
 
-    Task<GoogleLoginResultDto> OnLoggedInGoogle(string code);
+    Task<string> OnLoggedInGoogle(string code);
 }

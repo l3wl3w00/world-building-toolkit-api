@@ -2,15 +2,8 @@
 using Hellang.Middleware.ProblemDetails;
 
 namespace Api.Configurers;
-internal class AppConfigurer
+internal class AppConfigurer(WebApplication app)
 {
-    private readonly WebApplication _app;
-
-    private AppConfigurer(WebApplication app)
-    {
-        this._app = app;
-    }
-
     internal static void Configure(WebApplication app)
     {
         new AppConfigurer(app).Configure();
@@ -18,19 +11,19 @@ internal class AppConfigurer
 
     private void Configure()
     {
-        _app.UseProblemDetails();
+        app.UseProblemDetails();
         
-        if (_app.Environment.IsDevelopment())
+        if (app.Environment.IsDevelopment())
         {
-            _app.UseSwagger();
-            _app.UseSwaggerUI();
+            app.UseSwagger();
+            app.UseSwaggerUI();
         }
 
-        _app.UseHttpsRedirection();
-        _app.UseAuthentication();
-        _app.UseAuthorization();
-        _app.UseMiddleware<UserResolverMiddleware>();
+        app.UseHttpsRedirection();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.UseMiddleware<UserResolverMiddleware>();
 
-        _app.MapControllers();
+        app.MapControllers();
     }
 }

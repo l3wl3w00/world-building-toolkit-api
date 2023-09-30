@@ -7,30 +7,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Bll.Continent.Service;
 
-public class ContinentService : IContinentService
+public class ContinentService(
+        WorldBuilderDbContext worldBuilderDbContext,
+        IMapper mapper)
+    : IContinentService
 {
-    private readonly WorldBuilderDbContext _dbContext;
-    private readonly IMapper _mapper;
-
-    public ContinentService(WorldBuilderDbContext worldBuilderDbContext, IMapper mapper)
-    {
-        _dbContext = worldBuilderDbContext;
-        _mapper = mapper;
-    }
-
     public async Task<ContinentDto> Create(Guid planetId, CreateContinentDto createContinentDto)
     {
-        var continent = _mapper.Map<Dal.Entities.Continent>(createContinentDto);
+        var continent = mapper.Map<Dal.Entities.Continent>(createContinentDto);
         continent.PlanetId = planetId;
-        await _dbContext.Continents.AddAsync(continent);
+        await worldBuilderDbContext.Continents.AddAsync(continent);
         try
         {
-            await _dbContext.SaveChangesAsync();
+            await worldBuilderDbContext.SaveChangesAsync();
         }
         catch (DbUpdateException)
         {
             throw EntityNotFoundException.Create<Dal.Entities.Planet>(continent.PlanetId);
         }
-        return _mapper.Map<ContinentDto>(continent);
+        return mapper.Map<ContinentDto>(continent);
     }
 }

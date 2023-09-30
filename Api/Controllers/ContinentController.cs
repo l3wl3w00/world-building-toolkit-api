@@ -12,4 +12,10 @@ public class ContinentController(IContinentService continentService) : Controlle
     {
         return await continentService.Create(planetId, createContinentDto);
     }
+    
+    [HttpPatch("continent/{continentid:guid}/invert")]
+    public async Task<ActionResult<ContinentDto>> CreateContinent(Guid continentId)
+    {
+        return await continentService.Invert(continentId);
+    }
 }

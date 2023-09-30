@@ -12,6 +12,7 @@ public abstract class Option<T> : IEnumerable<T>
     public abstract T Value { get; }
 
     public abstract bool HasValue { get; }
+    public bool NoValue => !HasValue;
     
     public static implicit operator Option<T>(T? t)
     {

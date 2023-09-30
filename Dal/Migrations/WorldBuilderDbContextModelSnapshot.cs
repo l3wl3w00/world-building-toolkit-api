@@ -31,6 +31,9 @@ namespace Dal.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("Inverted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -42,7 +45,7 @@ namespace Dal.Migrations
 
                     b.HasIndex("PlanetId");
 
-                    b.ToTable("Continents", (string)null);
+                    b.ToTable("Continents");
                 });
 
             modelBuilder.Entity("Dal.Entities.Planet", b =>
@@ -71,7 +74,7 @@ namespace Dal.Migrations
                     b.HasIndex("CreatorUsername", "Name")
                         .IsUnique();
 
-                    b.ToTable("Planets", (string)null);
+                    b.ToTable("Planets");
                 });
 
             modelBuilder.Entity("Dal.Entities.User", b =>
@@ -284,7 +287,7 @@ namespace Dal.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("Dal.Entities.Continent.Bounds#Dal.Entities.PlanetCoordinate", "Bounds", b1 =>
+                    b.OwnsMany("Dal.Entities.PlanetCoordinate", "Bounds", b1 =>
                         {
                             b1.Property<Guid>("ContinentId")
                                 .HasColumnType("uniqueidentifier");
@@ -306,7 +309,7 @@ namespace Dal.Migrations
 
                             b1.HasKey("ContinentId", "Id");
 
-                            b1.ToTable("PlanetCoordinate", (string)null);
+                            b1.ToTable("PlanetCoordinate");
 
                             b1.WithOwner()
                                 .HasForeignKey("ContinentId");

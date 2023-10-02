@@ -145,7 +145,8 @@ internal class BuilderConfigurer(IServiceCollection services, IConfiguration con
     private void Controllers()
     {
         var converter = new JsonStringEnumConverter(JsonNamingPolicy.CamelCase);
-        services.AddControllers().AddJsonOptions(options =>
+        var mvcBuilder = services.AddControllers();
+        mvcBuilder.AddJsonOptions(options =>
                 options.JsonSerializerOptions.Converters.Add(converter)
         );
     }

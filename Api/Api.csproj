@@ -12,6 +12,7 @@
         <PackageReference Include="Hellang.Middleware.ProblemDetails" Version="6.5.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.10" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="8.0.0-rc.1.23421.29" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0-preview.6.23329.11" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.10">
           <PrivateAssets>all</PrivateAssets>

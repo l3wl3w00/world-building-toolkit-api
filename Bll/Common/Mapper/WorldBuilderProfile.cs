@@ -31,7 +31,12 @@ public class WorldBuilderProfile : Profile
     private void Continent()
     {
         CreateMap<CreateContinentDto, Dal.Entities.Continent>();
-        CreateMap<Dal.Entities.Continent, ContinentDto>();
+        CreateMap<Dal.Entities.Continent, ContinentDto>().ReverseMap();
+        CreateMap<ContinentPatchDto, Dal.Entities.Continent>()
+            .ForMember(dest => dest.Name, opt => opt.PreCondition(src => src.Name is not null))
+            .ForMember(dest => dest.Description, opt => opt.PreCondition(src => src.Description is not null))
+            .ForMember(dest => dest.Inverted, opt => opt.PreCondition(src => src.Inverted is not null))
+            .ReverseMap();
     }
     
     private void PlanetCoordinate()

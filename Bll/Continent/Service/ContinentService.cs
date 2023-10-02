@@ -4,6 +4,7 @@ using Bll.Common.Option;
 using Bll.Continent.Dto;
 using Dal;
 using Dal.Entities;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,4 +42,22 @@ public class ContinentService(
         await worldBuilderDbContext.SaveChangesAsync();
         return mapper.Map<ContinentDto>(continent);
     }
+
+    public async Task<ActionResult<ContinentDto>> ApplyPatch(Guid continentId,
+        ContinentPatchDto patch)
+    {
+        var continentToUpdate = await worldBuilderDbContext.Continents.SingleOrDefaultAsync(c => c.Id == continentId);
+
+        if (continentToUpdate == null)
+            throw EntityNotFoundException.Create<Dal.Entities.Continent>(continentId);
+        
+        mapper.Map(patch, continentToUpdate);
+
+        worldBuilderDbContext.Continents.Update(continentToUpdate);
+        
+        await worldBuilderDbContext.SaveChangesAsync();
+
+        return mapper.Map<ContinentDto>(continentToUpdate);
+    }
+    
 }

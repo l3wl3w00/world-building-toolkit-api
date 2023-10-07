@@ -39,10 +39,15 @@ namespace Dal.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("ParentContinentId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("PlanetId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ParentContinentId");
 
                     b.HasIndex("PlanetId");
 
@@ -282,6 +287,10 @@ namespace Dal.Migrations
 
             modelBuilder.Entity("Dal.Entities.Continent", b =>
                 {
+                    b.HasOne("Dal.Entities.Continent", "ParentContinent")
+                        .WithMany()
+                        .HasForeignKey("ParentContinentId");
+
                     b.HasOne("Dal.Entities.Planet", "Planet")
                         .WithMany("Continents")
                         .HasForeignKey("PlanetId")
@@ -317,6 +326,8 @@ namespace Dal.Migrations
                         });
 
                     b.Navigation("Bounds");
+
+                    b.Navigation("ParentContinent");
 
                     b.Navigation("Planet");
                 });

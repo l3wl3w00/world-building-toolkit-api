@@ -35,6 +35,7 @@ public class WorldBuilderDbContext(DbContextOptions<WorldBuilderDbContext> optio
                 .HasOne(c => c.Planet)
                 .WithMany(w => w.Continents)
                 .HasForeignKey(c => c.PlanetId);
+            continent.HasOne(c => c.ParentContinent);
             continent.OwnsMany(c => c.Bounds);
         });
     }

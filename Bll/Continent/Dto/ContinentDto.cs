@@ -3,7 +3,7 @@
 public record ContinentDto(
     Guid Id,
     string Name,
-    string? Description,
+    string Description,
     bool Inverted,
     List<PlanetCoordinateDto> Bounds);
 

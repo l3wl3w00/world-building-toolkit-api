@@ -9,9 +9,9 @@ namespace Dal.Entities;
 public class Planet
 {
     public Guid Id { get; set; }
-    public string Name { get; set; } = null!;
-    public string Description { get; set; } = null!;
-    public string CreatorUsername { get; set; } = null!;
+    public string Name { get; set; } = "";
+    public string Description { get; set; } = "";
+    public string CreatorUsername { get; set; } = "";
     public User Creator { get; set; } = null!;
     public float Radius { get; set; }
     public ICollection<Continent> Continents { get; set; } = new List<Continent>();

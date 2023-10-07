@@ -4,12 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Dal.Entities;
 
 namespace Dal;
-public class WorldBuilderDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
+public class WorldBuilderDbContext(DbContextOptions<WorldBuilderDbContext> options)
+    : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options)
 {
-    public WorldBuilderDbContext(DbContextOptions<WorldBuilderDbContext> options) : base(options)
-    {
-    }
-
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

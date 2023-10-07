@@ -34,19 +34,16 @@ public class GoogleTokenHandler : AuthenticationHandler<AuthenticationSchemeOpti
 
         try
         {
-            // Validate the token
             var validPayload = await GoogleJsonWebSignature.ValidateAsync(idToken);
 
-            // Create the user claims
+            validPayload.Name ??= validPayload.Email;
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, validPayload.Subject),
                 new Claim(ClaimTypes.Name, validPayload.Name),
                 new Claim(ClaimTypes.Email, validPayload.Email),
-                // Add more claims as needed...
             };
 
-            // Create the user identity and claims
             var identity = new ClaimsIdentity(claims, Scheme.Name);
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, Scheme.Name);

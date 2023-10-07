@@ -7,11 +7,18 @@ using Microsoft.VisualBasic.CompilerServices;
 
 namespace Bll.Common.Option;
 
-public abstract class Option<T> : IEnumerable<T>
+public readonly record struct Option<T>(T? NullableValue) : IEnumerable<T>
 {
-    public abstract T Value { get; }
+    public T Value
+    {
+        get
+        {
+            if (NoValue) throw new ValueNotFoundException();
+            return NullableValue!;
+        }
+    }
 
-    public abstract bool HasValue { get; }
+    public bool HasValue => NullableValue != null;
     public bool NoValue => !HasValue;
     
     public static implicit operator Option<T>(T? t)
@@ -25,8 +32,8 @@ public abstract class Option<T> : IEnumerable<T>
         return Some(value);
     }
 
-    public static Option<T> Some(T value) => new Some<T>(value);
-    public static Option<T> None => new None<T>();
+    public static Option<T> Some(T value) => new Option<T>(value);
+    public static Option<T> None => new(default);
     public IEnumerator<T> GetEnumerator()
     {
         if (HasValue) yield return Value;
@@ -42,19 +49,6 @@ public abstract class Option<T> : IEnumerable<T>
         if (HasValue) return Value;
         return func();
     }
-}
-
-class Some<T>(T value) : Option<T>
-{
-    public override T Value { get; } = value;
-
-    public override bool HasValue => true;
-}
-
-class None<T> : Option<T>
-{
-    public override T Value => throw new ValueNotFoundException();
-    public override bool HasValue => false;
 }
 
 public class ValueNotFoundException() : System.Exception("Getting the value of optional failed, because value was none");

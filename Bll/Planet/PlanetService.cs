@@ -5,13 +5,15 @@ using Microsoft.EntityFrameworkCore;
 using Bll.Common.Exception;
 using Bll.Common.Extension;
 using Bll.Common.Option;
+using Bll.Continent.Dto;
+using Bll.Continent.Service;
 using Bll.Planet.Dto;
 using Microsoft.Data.SqlClient;
 using Planet = Dal.Entities.Planet;
 
 namespace Bll.Planet;
 
-public class PlanetService(WorldBuilderDbContext dbContext, IMapper mapper) : IPlanetService
+public class PlanetService(WorldBuilderDbContext dbContext, IMapper mapper, IContinentService continentService) : IPlanetService
 {
     public async Task<ICollection<PlanetSummaryDto>> GetAll(Dal.Entities.User user)
     {
@@ -23,10 +25,12 @@ public class PlanetService(WorldBuilderDbContext dbContext, IMapper mapper) : IP
 
     public async Task<PlanetDto> Get(Guid guid)
     {
-        return await dbContext.Planets
+        var planet = await dbContext.Planets
             .Where(p => p.Id == guid)
-            .ProjectTo<PlanetDto>(mapper.ConfigurationProvider)
+            .Include(p => p.Continents)
+            .ThenInclude(c => c.ParentContinent)            
             .SingleOrDo(() => throw EntityNotFoundException.Create<Dal.Entities.Planet>(guid));
+        return mapper.Map<PlanetDto>(planet); // because .ProjectTo<PlanetDto>(mapper.ConfigurationProvider) produces incorrect result
     }
     
     public async Task<PlanetDto> Create(CreatePlanetDto createPlanetDto, Dal.Entities.User creator)
@@ -50,6 +54,16 @@ public class PlanetService(WorldBuilderDbContext dbContext, IMapper mapper) : IP
 
             throw;
         }
+
+        await continentService.Create(
+            planet.Id, 
+            new CreateContinentDto(
+                Name: "Root Continent",
+                Description: "",
+                ParentContinentId: null,
+                Bounds: new List<PlanetCoordinateDto>()
+                ));
+        
         return mapper.Map<PlanetDto>(planet);
     }
 

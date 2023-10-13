@@ -4,6 +4,7 @@ namespace Bll.Continent.Dto;
 
 public record ContinentDto(
     Guid Id,
+    ContinentDto? ParentContinent,
     string Name,
     string Description,
     bool Inverted,

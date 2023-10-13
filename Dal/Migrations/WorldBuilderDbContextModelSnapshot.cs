@@ -288,7 +288,7 @@ namespace Dal.Migrations
             modelBuilder.Entity("Dal.Entities.Continent", b =>
                 {
                     b.HasOne("Dal.Entities.Continent", "ParentContinent")
-                        .WithMany()
+                        .WithMany("ChildContinents")
                         .HasForeignKey("ParentContinentId");
 
                     b.HasOne("Dal.Entities.Planet", "Planet")
@@ -393,6 +393,11 @@ namespace Dal.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Dal.Entities.Continent", b =>
+                {
+                    b.Navigation("ChildContinents");
                 });
 
             modelBuilder.Entity("Dal.Entities.Planet", b =>

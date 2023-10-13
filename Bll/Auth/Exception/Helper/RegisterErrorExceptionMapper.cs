@@ -17,11 +17,21 @@ public class RegisterErrorExceptionMapper
     {
         return error.Code switch
         {
-            "PasswordRequiresNonAlphanumeric" => new InvalidPasswordException("Password must contain a non alphanumeric character"),
-            "PasswordRequiresDigit" => new InvalidPasswordException("Password must contain a digit"),
-            "PasswordRequiresUpper" => new InvalidPasswordException("Password must contain an upper case character"),
-            "DuplicateUserName" => EntityAlreadyExistsException.Create<UserEntity>("username"),
-            "DuplicateEmail" => EntityAlreadyExistsException.Create<UserEntity>("email"),
+            "PasswordRequiresNonAlphanumeric" => 
+                (new InvalidPasswordException("Password must contain a non alphanumeric character") as System.Exception)
+                .ToOption(),
+            "PasswordRequiresDigit" => 
+                (new InvalidPasswordException("Password must contain a digit") as System.Exception)
+                .ToOption(),
+            "PasswordRequiresUpper" => 
+                (new InvalidPasswordException("Password must contain an upper case character") as System.Exception)
+                .ToOption(),
+            "DuplicateUserName" => 
+                (EntityAlreadyExistsException.Create<UserEntity>("username") as System.Exception)
+                .ToOption(),
+            "DuplicateEmail" => 
+                (EntityAlreadyExistsException.Create<UserEntity>("email") as System.Exception)
+                .ToOption(),
             _ => Option<System.Exception>.None,
         };
     }

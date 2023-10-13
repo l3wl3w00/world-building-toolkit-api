@@ -1,4 +1,5 @@
-﻿using Bll.Common.Option;
+﻿using System.Linq.Expressions;
+using Bll.Common.Option;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bll.Common.Extension;
@@ -15,6 +16,20 @@ public static class QueryableExtensions
     public static async Task<Option<TEntity>> FirstOrOptionAsync<TEntity>(this IQueryable<TEntity> queryable)
     {
         var result = await queryable.FirstOrDefaultAsync();
-        return Option<TEntity>.FromNullable(result);
+        return result.ToOption();
+    }
+    
+    public static async Task<Option<TEntity>> SingleOrOptionAsync<TEntity>(this IQueryable<TEntity> queryable)
+    {
+        var result = await queryable.SingleOrDefaultAsync();
+        return result.ToOption();
+    }
+    
+    public static async Task<Option<TEntity>> SingleOrOptionAsync<TEntity>(
+        this IQueryable<TEntity> queryable,
+        Expression<Func<TEntity,bool>> filter)
+    {
+        var result = await queryable.SingleOrDefaultAsync(filter);
+        return result.ToOption();
     }
 }

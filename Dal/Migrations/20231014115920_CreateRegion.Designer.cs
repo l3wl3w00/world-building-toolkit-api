@@ -4,6 +4,7 @@ using Dal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Dal.Migrations
 {
     [DbContext(typeof(WorldBuilderDbContext))]
-    partial class WorldBuilderDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231014115920_CreateRegion")]
+    partial class CreateRegion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -110,7 +113,7 @@ namespace Dal.Migrations
 
                     b.HasIndex("ContinentId");
 
-                    b.ToTable("Regions");
+                    b.ToTable("Region");
                 });
 
             modelBuilder.Entity("Dal.Entities.User", b =>
@@ -404,7 +407,7 @@ namespace Dal.Migrations
 
                             b1.HasKey("RegionId", "Id");
 
-                            b1.ToTable("Regions_Bounds");
+                            b1.ToTable("Region_Bounds");
 
                             b1.WithOwner()
                                 .HasForeignKey("RegionId");

@@ -31,17 +31,22 @@ public class WorldBuilderDbContext(DbContextOptions<WorldBuilderDbContext> optio
 
         builder.Entity<Continent>(continent =>
         {
-            continent
-                .HasOne(c => c.Planet)
+            continent.HasOne(c => c.Planet)
                 .WithMany(w => w.Continents)
                 .HasForeignKey(c => c.PlanetId);
             continent.HasOne(c => c.ParentContinent)
                 .WithMany(c => c.ChildContinents)
                 .HasForeignKey(c => c.ParentContinentId);
             continent.OwnsMany(c => c.Bounds);
+            continent.HasMany(c => c.Regions)
+                .WithOne(r => r.Continent)
+                .HasForeignKey(r => r.ContinentId);
         });
+
+        builder.Entity<Region>().OwnsMany(r => r.Bounds);
     }
 
     public DbSet<Planet> Planets => Set<Planet>();
     public DbSet<Continent> Continents => Set<Continent>();
+    public DbSet<Region> Regions => Set<Region>();
 }

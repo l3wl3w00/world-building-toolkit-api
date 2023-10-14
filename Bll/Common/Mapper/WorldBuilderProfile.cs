@@ -12,6 +12,7 @@ public class WorldBuilderProfile : Profile
     {
         Planet();
         Continent();
+        Region();
         PlanetCoordinate();
         UserIdentity();
     }
@@ -37,6 +38,12 @@ public class WorldBuilderProfile : Profile
             .ForMember(dest => dest.Description, opt => opt.PreCondition(src => src.Description is not null))
             .ForMember(dest => dest.Inverted, opt => opt.PreCondition(src => src.Inverted is not null))
             .ReverseMap();
+    }
+
+    private void Region()
+    {
+        CreateMap<CreateRegionDto, Dal.Entities.Region>();
+        CreateMap<Dal.Entities.Region, RegionDto>().ReverseMap();
     }
     
     private void PlanetCoordinate()

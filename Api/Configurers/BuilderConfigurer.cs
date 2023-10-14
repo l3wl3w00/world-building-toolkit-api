@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Bll.Auth;
@@ -14,20 +13,17 @@ using Bll.Common.Mapper;
 using Bll.Continent.Service;
 using Bll.User;
 using Bll.Planet;
+using Bll.Region;
 using Dal;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Dal.Entities;
 using Hellang.Middleware.ProblemDetails;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Server.HttpSys;
 using ProblemDetailsOptions = Hellang.Middleware.ProblemDetails.ProblemDetailsOptions;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Api.Configurers;
@@ -113,6 +109,7 @@ internal class BuilderConfigurer(IServiceCollection services, IConfiguration con
         services.AddTransient<IUserService, UserService>();
         services.AddTransient<IAuthService, AuthService>();
         services.AddTransient<IContinentService, ContinentService>();
+        services.AddTransient<IRegionService, RegionService>();
         services.AddTransient<IJwtTokenProvider, JwtTokenProvider>();
     }
 

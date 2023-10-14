@@ -13,4 +13,5 @@ public class Continent
     public Planet Planet { get; set; } = null!;
     public Continent? ParentContinent { get; set; }
     public ICollection<Continent> ChildContinents { get; set; } = new HashSet<Continent>();
+    public ICollection<Region> Regions { get; set; } = new HashSet<Region>();
 }

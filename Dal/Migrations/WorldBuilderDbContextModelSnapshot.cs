@@ -341,10 +341,10 @@ namespace Dal.Migrations
                             b1.Property<float>("Azimuthal")
                                 .HasColumnType("real");
 
-                            b1.Property<float>("Polar")
+                            b1.Property<float>("Height")
                                 .HasColumnType("real");
 
-                            b1.Property<float>("Radius")
+                            b1.Property<float>("Polar")
                                 .HasColumnType("real");
 
                             b1.HasKey("ContinentId", "Id");
@@ -396,10 +396,10 @@ namespace Dal.Migrations
                             b1.Property<float>("Azimuthal")
                                 .HasColumnType("real");
 
-                            b1.Property<float>("Polar")
+                            b1.Property<float>("Height")
                                 .HasColumnType("real");
 
-                            b1.Property<float>("Radius")
+                            b1.Property<float>("Polar")
                                 .HasColumnType("real");
 
                             b1.HasKey("RegionId", "Id");

@@ -1,3 +1,3 @@
 ﻿namespace Dal.Entities;
 
-public record PlanetCoordinate(float Radius, float Polar, float Azimuthal);
+public record PlanetCoordinate(float Height, float Polar, float Azimuthal);

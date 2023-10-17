@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Bll.Common.Exception;
 using Bll.Common.Extension;
+using Bll.Common.Option;
 using Bll.Continent.Dto;
 using Dal;
 using Microsoft.AspNetCore.Mvc;
@@ -32,5 +33,20 @@ public class RegionService(WorldBuilderDbContext dbContext, IMapper mapper) : IR
         var region = regionOpt.AssertNotNull(EntityNotFoundException.Create<RegionDto>(regionId));
         
         return mapper.Map<RegionDto>(region);
+    }
+    
+    public async Task<ActionResult<RegionDto>> ApplyPatch(Guid regionId, RegionPatchDto patch)
+    {
+        var regionToUpdate = await dbContext.Regions
+            .SingleOrOptionAsync(c => c.Id == regionId)
+            .AssertNotNullAsync(EntityNotFoundException.Create<Dal.Entities.Region>(regionId));
+        
+        mapper.Map(patch, regionToUpdate);
+
+        dbContext.Regions.Update(regionToUpdate);
+        
+        await dbContext.SaveChangesAsync();
+
+        return mapper.Map<RegionDto>(regionToUpdate);
     }
 }

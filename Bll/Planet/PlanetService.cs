@@ -28,7 +28,7 @@ public class PlanetService(WorldBuilderDbContext dbContext, IMapper mapper, ICon
         var planet = await dbContext.Planets
             .Where(p => p.Id == guid)
             .Include(p => p.Continents)
-            .ThenInclude(c => c.ParentContinent)            
+                .ThenInclude(c => c.Regions)
             .SingleOrDo(() => throw EntityNotFoundException.Create<Dal.Entities.Planet>(guid));
         return mapper.Map<PlanetDto>(planet); // because .ProjectTo<PlanetDto>(mapper.ConfigurationProvider) produces incorrect result
     }

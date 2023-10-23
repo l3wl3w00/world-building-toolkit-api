@@ -22,6 +22,28 @@ namespace Dal.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Dal.Entities.Calendar", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("FirstYear")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Calendars");
+                });
+
             modelBuilder.Entity("Dal.Entities.Continent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -54,15 +76,45 @@ namespace Dal.Migrations
                     b.ToTable("Continents");
                 });
 
+            modelBuilder.Entity("Dal.Entities.HistoricalEvent", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RegionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegionId");
+
+                    b.ToTable("Events");
+                });
+
             modelBuilder.Entity("Dal.Entities.Planet", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("CalendarId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("CreatorUsername")
                         .IsRequired()
                         .HasColumnType("nvarchar(256)");
+
+                    b.Property<TimeSpan>("DayLength")
+                        .HasColumnType("time");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -72,10 +124,16 @@ namespace Dal.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("NumberOfDaysInYear")
+                        .HasColumnType("int");
+
                     b.Property<float>("Radius")
                         .HasColumnType("real");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CalendarId")
+                        .IsUnique();
 
                     b.HasIndex("CreatorUsername", "Name")
                         .IsUnique();
@@ -315,6 +373,37 @@ namespace Dal.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Dal.Entities.Calendar", b =>
+                {
+                    b.OwnsMany("Dal.Entities.YearPhase", "YearPhases", b1 =>
+                        {
+                            b1.Property<Guid>("CalendarId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<long>("NumberOfDays")
+                                .HasColumnType("bigint");
+
+                            b1.HasKey("CalendarId", "Id");
+
+                            b1.ToTable("YearPhase");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CalendarId");
+                        });
+
+                    b.Navigation("YearPhases");
+                });
+
             modelBuilder.Entity("Dal.Entities.Continent", b =>
                 {
                     b.HasOne("Dal.Entities.Continent", "ParentContinent")
@@ -362,8 +451,63 @@ namespace Dal.Migrations
                     b.Navigation("Planet");
                 });
 
+            modelBuilder.Entity("Dal.Entities.HistoricalEvent", b =>
+                {
+                    b.HasOne("Dal.Entities.Region", "Region")
+                        .WithMany("Events")
+                        .HasForeignKey("RegionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("Dal.Entities.GlobalTimeInstance", "End", b1 =>
+                        {
+                            b1.Property<Guid>("HistoricalEventId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<TimeSpan>("Time")
+                                .HasColumnType("time");
+
+                            b1.HasKey("HistoricalEventId");
+
+                            b1.ToTable("Events");
+
+                            b1.WithOwner()
+                                .HasForeignKey("HistoricalEventId");
+                        });
+
+                    b.OwnsOne("Dal.Entities.GlobalTimeInstance", "Start", b1 =>
+                        {
+                            b1.Property<Guid>("HistoricalEventId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<TimeSpan>("Time")
+                                .HasColumnType("time");
+
+                            b1.HasKey("HistoricalEventId");
+
+                            b1.ToTable("Events");
+
+                            b1.WithOwner()
+                                .HasForeignKey("HistoricalEventId");
+                        });
+
+                    b.Navigation("End")
+                        .IsRequired();
+
+                    b.Navigation("Region");
+
+                    b.Navigation("Start")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Dal.Entities.Planet", b =>
                 {
+                    b.HasOne("Dal.Entities.Calendar", "Calendar")
+                        .WithOne("Planet")
+                        .HasForeignKey("Dal.Entities.Planet", "CalendarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Dal.Entities.User", "Creator")
                         .WithMany("Planets")
                         .HasForeignKey("CreatorUsername")
@@ -423,6 +567,8 @@ namespace Dal.Migrations
 
                     b.Navigation("AntiLandColor")
                         .IsRequired();
+
+                    b.Navigation("Calendar");
 
                     b.Navigation("Creator");
 
@@ -550,6 +696,11 @@ namespace Dal.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Dal.Entities.Calendar", b =>
+                {
+                    b.Navigation("Planet");
+                });
+
             modelBuilder.Entity("Dal.Entities.Continent", b =>
                 {
                     b.Navigation("ChildContinents");
@@ -560,6 +711,11 @@ namespace Dal.Migrations
             modelBuilder.Entity("Dal.Entities.Planet", b =>
                 {
                     b.Navigation("Continents");
+                });
+
+            modelBuilder.Entity("Dal.Entities.Region", b =>
+                {
+                    b.Navigation("Events");
                 });
 
             modelBuilder.Entity("Dal.Entities.User", b =>

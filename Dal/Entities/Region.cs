@@ -15,4 +15,5 @@ public class Region
     public Guid ContinentId { get; set; }
     public Color Color { get; set; } = Color.Black;
     public Continent? Continent { get; set; }
+    public ICollection<HistoricalEvent> Events { get; set; } = new List<HistoricalEvent>();
 }

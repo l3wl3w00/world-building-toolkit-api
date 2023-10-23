@@ -13,5 +13,6 @@ public class Region
     public RegionType RegionType { get; set; } = RegionType.Other;
     public List<PlanetCoordinate> Bounds { get; set; } = new List<PlanetCoordinate>();
     public Guid ContinentId { get; set; }
+    public Color Color { get; set; } = Color.Black;
     public Continent? Continent { get; set; }
 }

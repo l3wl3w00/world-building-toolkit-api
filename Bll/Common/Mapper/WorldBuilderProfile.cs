@@ -3,6 +3,7 @@ using Dal.Entities;
 using Bll.Auth.Dto;
 using Bll.Continent.Dto;
 using Bll.Planet.Dto;
+using Bll.Region.Dto;
 
 namespace Bll.Common.Mapper;
 
@@ -44,6 +45,12 @@ public class WorldBuilderProfile : Profile
     {
         CreateMap<CreateRegionDto, Dal.Entities.Region>();
         CreateMap<Dal.Entities.Region, RegionDto>().ReverseMap();
+        CreateMap<PlanetPatchDto, Dal.Entities.Planet>()
+            .ForMember(dest => dest.Name, opt => opt.PreCondition(src => src.Name is not null))
+            .ForMember(dest => dest.Description, opt => opt.PreCondition(src => src.Description is not null))
+            .ForMember(dest => dest.AntiLandColor, opt => opt.PreCondition(src => src.AntiLandColor is not null))
+            .ForMember(dest => dest.LandColor, opt => opt.PreCondition(src => src.LandColor is not null))
+            .ReverseMap();
     }
     
     private void PlanetCoordinate()

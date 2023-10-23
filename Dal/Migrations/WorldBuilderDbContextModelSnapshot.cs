@@ -371,7 +371,63 @@ namespace Dal.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsOne("Dal.Entities.Color", "AntiLandColor", b1 =>
+                        {
+                            b1.Property<Guid>("PlanetId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<byte>("A")
+                                .HasColumnType("tinyint");
+
+                            b1.Property<byte>("B")
+                                .HasColumnType("tinyint");
+
+                            b1.Property<byte>("G")
+                                .HasColumnType("tinyint");
+
+                            b1.Property<byte>("R")
+                                .HasColumnType("tinyint");
+
+                            b1.HasKey("PlanetId");
+
+                            b1.ToTable("Planets");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlanetId");
+                        });
+
+                    b.OwnsOne("Dal.Entities.Color", "LandColor", b1 =>
+                        {
+                            b1.Property<Guid>("PlanetId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<byte>("A")
+                                .HasColumnType("tinyint");
+
+                            b1.Property<byte>("B")
+                                .HasColumnType("tinyint");
+
+                            b1.Property<byte>("G")
+                                .HasColumnType("tinyint");
+
+                            b1.Property<byte>("R")
+                                .HasColumnType("tinyint");
+
+                            b1.HasKey("PlanetId");
+
+                            b1.ToTable("Planets");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlanetId");
+                        });
+
+                    b.Navigation("AntiLandColor")
+                        .IsRequired();
+
                     b.Navigation("Creator");
+
+                    b.Navigation("LandColor")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Dal.Entities.Region", b =>
@@ -410,7 +466,35 @@ namespace Dal.Migrations
                                 .HasForeignKey("RegionId");
                         });
 
+                    b.OwnsOne("Dal.Entities.Color", "Color", b1 =>
+                        {
+                            b1.Property<Guid>("RegionId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<byte>("A")
+                                .HasColumnType("tinyint");
+
+                            b1.Property<byte>("B")
+                                .HasColumnType("tinyint");
+
+                            b1.Property<byte>("G")
+                                .HasColumnType("tinyint");
+
+                            b1.Property<byte>("R")
+                                .HasColumnType("tinyint");
+
+                            b1.HasKey("RegionId");
+
+                            b1.ToTable("Regions");
+
+                            b1.WithOwner()
+                                .HasForeignKey("RegionId");
+                        });
+
                     b.Navigation("Bounds");
+
+                    b.Navigation("Color")
+                        .IsRequired();
 
                     b.Navigation("Continent");
                 });

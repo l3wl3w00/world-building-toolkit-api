@@ -19,6 +19,9 @@ public class WorldBuilderDbContext(DbContextOptions<WorldBuilderDbContext> optio
             
             world.HasIndex(w => new { w.CreatorUsername, w.Name })
                 .IsUnique();
+
+            world.OwnsOne(w => w.LandColor);
+            world.OwnsOne(w => w.AntiLandColor);
         });
 
         builder.Entity<User>(user =>
@@ -43,7 +46,11 @@ public class WorldBuilderDbContext(DbContextOptions<WorldBuilderDbContext> optio
                 .HasForeignKey(r => r.ContinentId);
         });
 
-        builder.Entity<Region>().OwnsMany(r => r.Bounds);
+        builder.Entity<Region>(region =>
+        {
+            region.OwnsOne(r => r.Color);
+            region.OwnsMany(r => r.Bounds);
+        });
     }
 
     public DbSet<Planet> Planets => Set<Planet>();

@@ -14,6 +14,8 @@ public class Planet
     public string CreatorUsername { get; set; } = "";
     public User Creator { get; set; } = null!;
     public float Radius { get; set; }
+    public Color LandColor { get; set; } = Color.Black;
+    public Color AntiLandColor { get; set; } = Color.Black;
     public ICollection<Continent> Continents { get; set; } = new List<Continent>();
 }
 

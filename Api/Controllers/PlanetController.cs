@@ -51,9 +51,9 @@ public class PlanetController(IPlanetService planetService) : ControllerBase
         
     [HttpPatch("{id:guid}")]
     [Authorize]
-    public async Task<ActionResult<PlanetSummaryDto>> UpdateNameAndDescription(Guid id, [FromBody] CreatePlanetDto updatePlanetDto)
+    public async Task<ActionResult<PlanetSummaryDto>> UpdateNameAndDescription(Guid id, [FromBody] PlanetPatchDto updateDto)
     {
-        var response = await planetService.UpdateNameAndDescription(id, HttpContext.GetUserEntity(), updatePlanetDto);
+        var response = await planetService.UpdateNameAndDescription(id, HttpContext.GetUserEntity(), updateDto);
         return Ok(response);
     }
 }

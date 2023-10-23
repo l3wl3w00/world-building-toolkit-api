@@ -9,6 +9,5 @@ public interface IPlanetService
     Task<PlanetDto> Get(Guid guid);
     Task<PlanetDto> Create(CreatePlanetDto createPlanetDto, Dal.Entities.User creator);
     Task<bool> Delete(Guid id);
-    Task<PlanetSummaryDto> UpdateNameAndDescription(Guid id, Dal.Entities.User user,
-        CreatePlanetDto updatePlanetDto);
+    Task<PlanetSummaryDto> UpdateNameAndDescription(Guid id, Dal.Entities.User user, PlanetPatchDto planetPatchDto);
 }

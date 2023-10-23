@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net.Http.Json;
 using System.Net;
 using System.Transactions;
+using Dal.Entities;
 using FluentAssertions;
 
 namespace Test.Integration.Planet;
@@ -29,7 +30,9 @@ public class PlanetControllerTests : IClassFixture<CustomWebApplicationFactory>
                 new
                 (
                     Name: "test planet", 
-                    Description: "test description"
+                    Description: "test description",
+                    LandColor: new Color(0,0,0,0),
+                    AntiLandColor: new Color(0,0,0,0)
                 )
             )
             .Generate();

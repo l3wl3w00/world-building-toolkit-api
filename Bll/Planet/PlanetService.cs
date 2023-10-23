@@ -77,15 +77,14 @@ public class PlanetService(WorldBuilderDbContext dbContext, IMapper mapper, ICon
     }
 
     public async Task<PlanetSummaryDto> UpdateNameAndDescription(Guid id, Dal.Entities.User user,
-        CreatePlanetDto updatePlanetDto)
+        PlanetPatchDto planetPatchDto)
     {
         var planetToUpdate = await FindOrThrowDoesntExist(id);
-        var alreadyExits = (await FindByName(updatePlanetDto.Name, user)).HasValue;
+        var alreadyExits = (await FindByName(planetPatchDto.Name, user)).HasValue;
         if (alreadyExits) throw EntityAlreadyExistsException.Create<Dal.Entities.Planet>();
-        
-        planetToUpdate.Name = updatePlanetDto.Name;
-        planetToUpdate.Description = updatePlanetDto.Description;
 
+        mapper.Map(planetPatchDto, planetToUpdate);
+        
         dbContext.Planets.Update(planetToUpdate);
         await dbContext.SaveChangesAsync();
         return mapper.Map<PlanetSummaryDto>(planetToUpdate);

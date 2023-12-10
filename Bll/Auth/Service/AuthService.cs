@@ -4,7 +4,8 @@ using Bll.Auth.Dto;
 using Bll.Auth.Exception;
 using Bll.Auth.Jwt;
 using Bll.Auth.Settings;
-using Bll.User;
+using Bll.Common.Result_;
+using Bll.User_;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
@@ -19,19 +20,25 @@ public class AuthService(
 {
     private readonly GoogleOAuthSettings _googleOAuthValues = googleOAuthOptions.Value;
 
-    public async Task<UserIdentityDto> Login(LoginDto loginDto)
+    public async Task<Result<UserIdentityDtoWithToken>> Login(LoginDto loginDto)
     {
-        var user = await userService.FindUserByLogin(loginDto);
+        var findUserResult = await userService.FindUserByLogin(loginDto);
+        if (findUserResult.IsError) return findUserResult.Into<UserIdentityDtoWithToken>();
+        var user = findUserResult.OkValue;
         var passwordHash = user.PasswordHash ?? throw new UserRegisteredThroughOAuthException();
         var result = userManager.PasswordHasher.VerifyHashedPassword(user,passwordHash, loginDto.Password);
         if (result != PasswordVerificationResult.Success) throw new LoginException();
 
+        if (user.Email == null || user.UserName == null)
+        {
+            return new System.Exception($"User {user.Id} has no username or email").ToErrorResult<UserIdentityDtoWithToken>();
+        }
         var token = jwtTokenProvider.Generate(new Dictionary<string, string>
         {
             { "email", user.Email },
             { "username", user.UserName },
         });
-        return new UserIdentityDto(user.UserName, user.Email, token);
+        return new UserIdentityDtoWithToken(user.UserName, user.Email, token).ToOkResult();
     }
 
     // Should be abstracted if more oauth provider
@@ -44,7 +51,8 @@ public class AuthService(
         var nameClaim = token!.Claims.First(c => c.Type == "name");
         var emailClaim = token.Claims.First(c => c.Type == "email");
 
-        var user = await userService.GetOrCreateUser(new GoogleIdentity(nameClaim.Value, emailClaim.Value));
+        var userResult = await userService.GetOrCreateUser(new GoogleIdentity(nameClaim.Value, emailClaim.Value));
+        userResult.ThrowIfError();
         return "Successfully logged in! You can now navigate back to the app!";
     }
 

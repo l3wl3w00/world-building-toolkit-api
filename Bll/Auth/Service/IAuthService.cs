@@ -1,4 +1,5 @@
 ﻿using Bll.Auth.Dto;
+using Bll.Common.Result_;
 
 namespace Bll.Auth.Service;
 
@@ -13,7 +14,7 @@ public interface IAuthService
         string IdToken);
 
     Task<GoogleTokenResponseDto> CreateTokenForGoogleAsync(string code);
-    public Task<UserIdentityDto> Login(LoginDto loginDto);
+    public Task<Result<UserIdentityDtoWithToken>> Login(LoginDto loginDto);
 
     Task<string> OnLoggedInGoogle(string code);
 }

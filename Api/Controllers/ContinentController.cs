@@ -1,5 +1,5 @@
-﻿using Bll.Continent.Dto;
-using Bll.Continent.Service;
+﻿using Bll.Continent_.Dto;
+using Bll.Continent_.Service;
 using Dal.Entities;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +11,7 @@ namespace Api.Controllers;
 public class ContinentController(IContinentService continentService) : ControllerBase
 {
     [HttpPost("planet/{planetid:guid}/continent")]
-    public async Task<ActionResult<ContinentDto>> Create(Guid planetId, CreateContinentDto createContinentDto)
+    public async Task<ActionResult<ContinentDto>> Create(Guid planetId, [FromBody] CreateContinentDto createContinentDto)
     {
         return await continentService.Create(planetId, createContinentDto);
     }

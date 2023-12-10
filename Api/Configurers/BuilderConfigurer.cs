@@ -1,19 +1,23 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Bll.AiAssistant;
+using Bll.AiAssistant.Dto;
 using Bll.Auth;
 using Bll.Auth.Exception;
 using Bll.Auth.Exception.Helper;
 using Bll.Auth.Jwt;
 using Bll.Auth.Service;
 using Bll.Auth.Settings;
+using Bll.Calendar_;
 using Bll.Common;
 using Bll.Common.Exception;
 using Bll.Common.Mapper;
-using Bll.Continent.Service;
-using Bll.User;
-using Bll.Planet;
-using Bll.Region;
+using Bll.Continent_.Service;
+using Bll.Event_;
+using Bll.Planet_;
+using Bll.Region_;
+using Bll.User_;
 using Dal;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +29,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using ProblemDetailsOptions = Hellang.Middleware.ProblemDetails.ProblemDetailsOptions;
 using Microsoft.IdentityModel.Tokens;
+using OpenAI_API;
 
 namespace Api.Configurers;
 internal class BuilderConfigurer(IServiceCollection services, IConfiguration config)
@@ -37,7 +42,6 @@ internal class BuilderConfigurer(IServiceCollection services, IConfiguration con
 
     private void Configure()
     {
-        _jwtSection.Bind(_jwtGenerationSettings);
         Database();
         SetAuthentication(); // this has to be after the identity EF config
         SetOptions();
@@ -47,11 +51,11 @@ internal class BuilderConfigurer(IServiceCollection services, IConfiguration con
         Logging();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
-
     }
 
     private void SetAuthentication()
     {
+        _jwtSection.Bind(_jwtGenerationSettings);
         services.AddAuthentication()
             .AddScheme<AuthenticationSchemeOptions, GoogleTokenHandler>(GoogleDefaults.AuthenticationScheme, null)
             .AddJwtBearer(bearerOptions =>
@@ -103,14 +107,21 @@ internal class BuilderConfigurer(IServiceCollection services, IConfiguration con
 
     private void RegisterServices()
     {
-        services.AddAutoMapper(typeof(WorldBuilderProfile));
-        services.AddTransient<IPlanetService, PlanetService>();
-        services.AddTransient<RegisterErrorExceptionMapper>();
-        services.AddTransient<IUserService, UserService>();
-        services.AddTransient<IAuthService, AuthService>();
-        services.AddTransient<IContinentService, ContinentService>();
-        services.AddTransient<IRegionService, RegionService>();
-        services.AddTransient<IJwtTokenProvider, JwtTokenProvider>();
+        services
+            .AddAutoMapper(typeof(WorldBuilderProfile))
+            .AddTransient<IPlanetModifierService, PlanetModifierService>()
+            .AddTransient<IPlanetQueryService, PlanetQueryService>()
+            .AddTransient<RegisterErrorExceptionMapper>()
+            .AddTransient<IUserService, UserService>()
+            .AddTransient<IAuthService, AuthService>()
+            .AddTransient<IContinentService, ContinentService>()
+            .AddTransient<IRegionService, RegionService>()
+            .AddTransient<IJwtTokenProvider, JwtTokenProvider>()
+            .AddTransient<ICalendarService, CalendarService>()
+            .AddTransient<IHistoricalEventService, HistoricalEventService>()
+            .AddTransient<IAiAssistantService, AiAssistantService>()
+            .AddSingleton<IOpenAIAPI, OpenAIAPI>(_ => new(config["Authentication:OpenAi:ApiKey"]))
+            ;
     }
 
     private void ProblemDetails()
@@ -126,6 +137,9 @@ internal class BuilderConfigurer(IServiceCollection services, IConfiguration con
             configurer.CreateMapping<LoginException>(StatusCodes.Status401Unauthorized);
             configurer.CreateMapping<UserRegisteredThroughOAuthException>(StatusCodes.Status401Unauthorized);
             configurer.CreateMapping<GoogleJwtGenerationException>(StatusCodes.Status401Unauthorized);
+            configurer.CreateMapping<InvalidYearPhasesException>(StatusCodes.Status400BadRequest);
+            configurer.CreateMapping<InvalidPasswordException>(StatusCodes.Status400BadRequest);
+            configurer.CreateMapping<RegisterException>(StatusCodes.Status400BadRequest);
         });
     }
 

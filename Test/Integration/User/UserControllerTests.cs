@@ -2,7 +2,6 @@
 using System.Net.Http.Json;
 using System.Transactions;
 using Bll.Auth.Dto;
-using Bll.Planet.Dto;
 using Bogus;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;

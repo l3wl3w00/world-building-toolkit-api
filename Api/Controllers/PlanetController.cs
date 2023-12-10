@@ -2,9 +2,10 @@ using System.Collections;
 using Bll.Auth;
 using Bll.Common;
 using Bll.Common.Extension;
-using Bll.Planet;
+using Bll.Common.Result_;
+using Bll.Planet_;
+using Bll.Planet_.Dto;
 using Microsoft.AspNetCore.Mvc;
-using Bll.Planet.Dto;
 using Dal.Entities;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,13 +14,14 @@ using Microsoft.AspNetCore.Authorization;
 namespace Api.Controllers;
 [ApiController]
 [Route("[controller]")]
-public class PlanetController(IPlanetService planetService) : ControllerBase
+public class PlanetController(IPlanetModifierService planetModifierService, IPlanetQueryService planetQueryService) : ControllerBase
 {
     [HttpGet("{guid:guid}")]
     [Authorize(AuthenticationSchemes = GoogleDefaults.AuthenticationScheme + "," + JwtBearerDefaults.AuthenticationScheme)]
     public async Task<ActionResult<PlanetDto>> Get(Guid guid)
     {
-        return await planetService.Get(guid);
+        var result = await planetQueryService.Get(guid);
+        return result.ThrowIfError();
     }
     
     
@@ -28,7 +30,7 @@ public class PlanetController(IPlanetService planetService) : ControllerBase
     public async Task<ActionResult<ICollection<PlanetSummaryDto>>> GetAllForUser()
     {
         
-        var worlds =  await planetService.GetAll(HttpContext.GetUserEntity());
+        var worlds =  await planetQueryService.GetAll(HttpContext.GetUserEntity());
 
         return Ok(worlds);
     }
@@ -37,23 +39,31 @@ public class PlanetController(IPlanetService planetService) : ControllerBase
     [Authorize]
     public async Task<ActionResult<PlanetDto>> Create([FromBody] CreatePlanetDto createPlanetDto)
     {
-        return await planetService.Create(createPlanetDto, HttpContext.GetUserEntity());
+        return await planetModifierService.Create(createPlanetDto, HttpContext.GetUserEntity());
     }
     
     [HttpDelete("{id:guid}")]
     [Authorize]
     public async Task<ActionResult> Delete(Guid id)
     {
-        await planetService.Delete(id);
+        await planetModifierService.Delete(id);
         return NoContent();
     }
     
         
     [HttpPatch("{id:guid}")]
     [Authorize]
-    public async Task<ActionResult<PlanetSummaryDto>> UpdateNameAndDescription(Guid id, [FromBody] PlanetPatchDto updateDto)
+    public async Task<ActionResult<PlanetSummaryDto>> Patch(Guid id, [FromBody] PlanetPatchDto updateDto)
     {
-        var response = await planetService.UpdateNameAndDescription(id, HttpContext.GetUserEntity(), updateDto);
+        var response = await planetModifierService.Patch(id, HttpContext.GetUserEntity(), updateDto);
+        return Ok(response);
+    }
+    
+    [HttpPatch("{id:guid}/calendar")]
+    [Authorize]
+    public async Task<ActionResult<PlanetSummaryDto>> UpdateCalendar(Guid id, [FromBody] PlanetPatchDto updateDto)
+    {
+        var response = await planetModifierService.Patch(id, HttpContext.GetUserEntity(), updateDto);
         return Ok(response);
     }
 }

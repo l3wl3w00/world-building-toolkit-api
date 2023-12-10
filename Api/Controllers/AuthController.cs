@@ -1,15 +1,9 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Bll.Auth;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Bll.Auth.Dto;
 using Bll.Auth.Service;
-using Bll.Auth.Settings;
 using Bll.Common;
-using Bll.User;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.IdentityModel.JsonWebTokens;
+using Bll.Common.Result_;
+using Bll.User_;
 
 namespace Api.Controllers;
 
@@ -19,13 +13,15 @@ public class AuthController(IUserService userService, IAuthService authService) 
     [HttpPost("register")]
     public async Task<ActionResult<UserIdentityDto>> Register([FromBody] RegisterDto registerDto)
     {
-        return await userService.Create(registerDto);
+        var result = await userService.Create(registerDto);
+        return result.ThrowIfError();
     }
     
     [HttpPost("login")]
-    public async Task<ActionResult<UserIdentityDto>> Login([FromBody] LoginDto loginDto)
+    public async Task<ActionResult<UserIdentityDtoWithToken>> Login([FromBody] LoginDto loginDto)
     {
-        return await authService.Login(loginDto);
+        var result = await authService.Login(loginDto);
+        return result.ThrowIfError();
     }
     
     [HttpGet(Constants.GoogleRedirectUri)]

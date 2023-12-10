@@ -17,13 +17,13 @@ public class WorldBuilderDbContext(DbContextOptions<WorldBuilderDbContext> optio
                 .HasPrincipalKey(u => u.UserName)
                 .HasForeignKey(w => w.CreatorUsername);
             
-            planet.HasOne(p => p.Calendar)
+            planet.HasMany(p => p.Calendars)
                 .WithOne(c => c.Planet)
-                .HasForeignKey((Planet p) => p.CalendarId);
+                .HasForeignKey(c => c.PlanetId);
             
             planet.HasIndex(w => new { w.CreatorUsername, w.Name })
                 .IsUnique();
-
+            
             planet.OwnsOne(w => w.LandColor);
             planet.OwnsOne(w => w.AntiLandColor);
         });
@@ -66,8 +66,14 @@ public class WorldBuilderDbContext(DbContextOptions<WorldBuilderDbContext> optio
         
         builder.Entity<HistoricalEvent>(hEvent =>
         {
-            hEvent.OwnsOne(e => e.Start);
-            hEvent.OwnsOne(e => e.End);
+            hEvent
+                .HasOne(e => e.DefaultCalendar)
+                .WithMany(c => c.Events)
+                .HasForeignKey(e => e.DefaultCalendarId)
+                .OnDelete(DeleteBehavior.NoAction);
+            hEvent
+                .Ignore(e => e.RelativeStart)
+                .Ignore(e => e.RelativeEnd);
         });
         
     }

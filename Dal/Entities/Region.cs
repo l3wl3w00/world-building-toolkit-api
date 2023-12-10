@@ -4,7 +4,7 @@ public enum RegionType
 {
     Country, City, Natural, Other
 }
-public class Region
+public class Region : IModel
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = "";

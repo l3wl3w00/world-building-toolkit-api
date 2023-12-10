@@ -1,42 +1,29 @@
 ﻿using System.Collections;
 using System.Collections.ObjectModel;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 
 namespace Dal.Entities;
 
-public class Calendar
+public class Calendar : IModel
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = "";
     public string Description { get; set; } = "";
     
-    public uint FirstYear { get; set; }
+    public ulong FirstYear { get; set; }
     public List<YearPhase> YearPhases { get; set; } = new();
 
-    public Planet? Planet { get; set; }
+    public Planet Planet { get; set; } = null!;
+    public Guid PlanetId { get; set; }
+    public ICollection<HistoricalEvent> Events { get; set; } = new HashSet<HistoricalEvent>();
+
+    public bool AreYearPhasesValidForPlanet(Planet planet) => 
+        YearPhases.Sum(p => p.NumberOfDays) == planet.NumberOfDaysInYear;
 }
 
-public record CalendarRelativeTimeInstance(GlobalTimeInstance GlobalTime, Calendar Calendar, Planet Planet)
+public record YearPhase(string Name, uint NumberOfDays)
 {
-    // public long Year
-    // {
-    //     get
-    //     {
-    //         GlobalTime.Time.
-    //         return Calendar.FirstYear - GlobalTime.Time.Year;
-    //     }
-    // }
-    //
-    // public YearPhase Phase
-    // {
-    //     get
-    //     {
-    //         
-    //         foreach (var phase in Calendar.YearPhases)
-    //         {
-    //             phase.NumberOfDays;
-    //         }
-    //     }
-    // }
+    public uint DaysBefore(IEnumerable<YearPhase> yearPhases) => 
+        (uint) yearPhases.TakeWhile(yp => yp.Name != Name).Sum(yp => yp.NumberOfDays);
 }
-public record YearPhase(string Name, uint NumberOfDays);
-
